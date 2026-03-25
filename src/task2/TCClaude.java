@@ -1,4 +1,6 @@
-import java.util.Arrays;
+package task2;
+
+import graph.Graph;
 
 public class TCClaude {
 

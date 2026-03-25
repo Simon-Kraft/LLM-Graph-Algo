@@ -1,3 +1,7 @@
+package task2;
+
+import graph.Graph;
+
 public class TCGPTCodex {
 
     /**

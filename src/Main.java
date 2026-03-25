@@ -1,6 +1,9 @@
 import java.io.*;
 import java.util.Arrays;
 
+import graph.Graph;
+import task2.*;
+
 public class Main {
 
     private static final int DEFAULT_SCALE = 10;

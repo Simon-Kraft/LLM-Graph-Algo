@@ -1,3 +1,7 @@
+package task2;
+
+import graph.Graph;
+
 public class TCBaseline {
 
     // Baseline brute-force (ground truth for correctness checking)

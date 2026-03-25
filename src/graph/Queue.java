@@ -1,3 +1,4 @@
+package graph;
 public class Queue {
 
     private static final int EMPTY = -1;
