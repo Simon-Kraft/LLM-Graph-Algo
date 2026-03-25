@@ -190,12 +190,15 @@ public class Main {
         if (PRINT)
             originalGraph.print(outfile);
 
-        // --- Run BFS benchmarks ---
-        benchmarkBFS(BFS::bfsVisited, originalGraph, "bfs_visited");
-        benchmarkBFS(BFS::bfsHybridVisited, originalGraph, "bfs_hybrid_visited");
+        // // --- Run BFS benchmarks ---
+        // benchmarkBFS(BFS::bfsVisited, originalGraph, "bfs_visited");
+        // benchmarkBFS(BFS::bfsHybridVisited, originalGraph, "bfs_hybrid_visited");
 
         // --- Run TC benchmarks ---
-        benchmarkTC(TC::fast, originalGraph, graph, "tc_fast_placeholder");
+        benchmarkTC(TCBaseline::baseline, originalGraph, graph, "tc_baseline");
+        benchmarkTC(TCClaude::fast, originalGraph, graph, "tc_claude");
+        benchmarkTC(TCGemini::fast, originalGraph, graph, "tc_gemini");
+        benchmarkTC(TCGPTCodex::fast, originalGraph, graph, "tc_gptcodex");
 
         if (outfile != System.out)
             outfile.close();

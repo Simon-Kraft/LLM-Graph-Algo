@@ -15,3 +15,16 @@ bin/
 
 # Results output (optional - remove if you want to track results in git)
 results/
+
+# LaTeX build artifacts
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.bbl
+report/*.blg
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/*.bcf
+report/*.run.xml

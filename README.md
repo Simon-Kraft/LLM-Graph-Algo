@@ -84,6 +84,6 @@ IEEE HPEC 2025.
 
 ## Acknowledgements
 
-This project was completed as a term project for CPSC482/682 Data Structures II.
+This project was completed as a term project for CPSC482/682 Data Structures II at the University of Northern British Columbia.
 The Java infrastructure was translated from the original C benchmark code by Bader et al.
-using Claude (Anthropic) as a translation assistant.
+using Claude Opus 4.6 (Anthropic) as a translation assistant.

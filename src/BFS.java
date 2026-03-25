@@ -104,17 +104,23 @@ public class BFS {
     }
 
     private static int bottomUpStep(int[] frontier, int[] next, boolean[] visited,
-                                     Graph graph, int frontierSize, int[] level) {
+                                     Graph graph, int frontierSize, int[] level,
+                                     boolean[] inFrontier) {
         int[] Ap = graph.rowPtr;
         int[] Ai = graph.colInd;
+        int n = graph.numVertices;
         int nextSize = 0;
 
-        for (int i = 0; i < frontierSize; i++) {
-            int v = frontier[i];
+        // Mark frontier vertices for O(1) membership test
+        for (int i = 0; i < frontierSize; i++)
+            inFrontier[frontier[i]] = true;
+
+        // For each unvisited vertex, check if any neighbor is in the frontier
+        for (int v = 0; v < n; v++) {
             if (!visited[v]) {
                 for (int j = Ap[v]; j < Ap[v + 1]; j++) {
                     int w = Ai[j];
-                    if (w == frontier[j]) {
+                    if (inFrontier[w]) {
                         visited[v] = true;
                         level[v] = level[w] + 1;
                         next[nextSize++] = v;
@@ -123,6 +129,11 @@ public class BFS {
                 }
             }
         }
+
+        // Clear frontier marks
+        for (int i = 0; i < frontierSize; i++)
+            inFrontier[frontier[i]] = false;
+
         return nextSize;
     }
 
@@ -135,10 +146,12 @@ public class BFS {
 
         int[] frontier = new int[n];
         int[] next = new int[n];
+        boolean[] inFrontier = new boolean[n];
 
         int frontierSize = 0;
 
         frontier[frontierSize++] = startVertex;
+        visited[startVertex] = true;
         level[startVertex] = 0;
 
         while (frontierSize > 0) {
@@ -157,7 +170,7 @@ public class BFS {
 
             int nextSize;
             if (numEdgesFrontier > numEdgesUnexplored / ALPHA) {
-                nextSize = bottomUpStep(frontier, next, visited, graph, frontierSize, level);
+                nextSize = bottomUpStep(frontier, next, visited, graph, frontierSize, level, inFrontier);
             } else {
                 nextSize = topDownStep(frontier, next, visited, graph, frontierSize, level);
             }
@@ -168,9 +181,12 @@ public class BFS {
             next = temp;
             frontierSize = nextSize;
 
-            if (frontierSize <= n / BETA) {
-                int nextSize2 = topDownStep(frontier, next, visited, graph, frontierSize, level);
-                // Note: matches C code structure (result not swapped back in same iteration)
+            if (frontierSize > 0 && frontierSize <= n / BETA) {
+                nextSize = topDownStep(frontier, next, visited, graph, frontierSize, level);
+                temp = frontier;
+                frontier = next;
+                next = temp;
+                frontierSize = nextSize;
             }
         }
     }

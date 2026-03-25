@@ -1,0 +1,237 @@
+\input{preamble}
+
+\singlespacing
+
+\begin{document}
+
+%---------------------------------------------------------------
+% TITLE PAGE
+%---------------------------------------------------------------
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Huge\bfseries Evaluating LLM-Generated Java Code for Graph Algorithm Analysis\par}
+    \vspace{2cm}
+    {\Large [Your Full Name]\par}
+    \vspace{0.5cm}
+    {\large Student ID: [Your ID]\par}
+    {\large Email: [your.email@unbc.ca]\par}
+    \vspace{0.5cm}
+    {\large CPSC 482/682 --- Data Structures II\par}
+    {\large University of Northern British Columbia\par}
+    \vspace{0.5cm}
+    {\large Date of Submission: April 3, 2026\par}
+\end{titlepage}
+
+%---------------------------------------------------------------
+% ABSTRACT
+%---------------------------------------------------------------
+\begin{abstract}
+Large language models (LLMs) are increasingly used to automate software development, yet most evaluations focus on high-level languages such as Python. This project extends the study by Barati Nia et al.\ \cite{llmgen2025} by evaluating whether state-of-the-art LLMs can generate efficient \textit{Java} implementations of graph algorithms when provided only with C language source files as context. We benchmark three LLMs --- OpenAI ChatGPT, Anthropic Claude, and Google Gemini --- using two approaches: an optimization approach for triangle counting and an algorithm-synthesis approach covering triangle counting, diameter finding, and clique number. Using the RMAT synthetic graph benchmark suite (scales 6--18), we evaluate each model's generated code on compilability, correctness, and runtime efficiency. Our results show that [FILL IN KEY RESULT 1] and [FILL IN KEY RESULT 2], providing new insights into LLM cross-language code generation capabilities.
+\end{abstract}
+
+\newpage
+
+%---------------------------------------------------------------
+% 1. INTRODUCTION
+%---------------------------------------------------------------
+\section{Introduction}
+
+% (~300-400 words)
+% - Why is LLM code generation interesting?
+% - Why does it matter that we test Java with C input?
+% - Briefly describe what you did and outline the report.
+
+The rapid growth of large language models (LLMs) has opened new possibilities for automated software development. Recent work has begun to evaluate not just whether LLM-generated code is correct, but whether it is \textit{efficient} --- particularly for performance-critical applications \cite{llmgen2025, effibench2024}.
+
+A key open question is how LLMs handle cross-language code generation: can a model generate efficient code in one language (Java) when all provided context is written in another (C)? This is a practically important scenario, as many legacy systems are written in C while new development often targets higher-level languages. Evaluating this capability provides insight into LLMs' true algorithmic reasoning ability, separating genuine understanding from simple pattern matching.
+
+This project replicates and extends the experimental evaluation of Barati Nia et al.\ \cite{llmgen2025}, which benchmarked eight LLMs generating C implementations of graph algorithms. We instead prompt three LLMs --- [LLM 1], [LLM 2], and [LLM 3] --- to generate Java implementations while providing only C source files as context, using the same RMAT benchmark graphs \cite{rmat2004} ranging from scale 6 to 18.
+
+We chose these three LLMs because [MOTIVATE YOUR CHOICE HERE --- e.g., they represent the three dominant commercial AI providers, they are publicly accessible, and they scored competitively in the original paper].
+
+The remainder of this report is organized as follows. Section~\ref{sec:testing} describes the experimental setup, testing environment, and results. Section~\ref{sec:conclusions} summarizes our findings and suggests directions for future work.
+
+%---------------------------------------------------------------
+% 2. NUMERICAL TESTING
+%---------------------------------------------------------------
+\section{Numerical Testing}
+\label{sec:testing}
+
+\subsection{Testing Environment}
+
+% Find your Mac specs:
+% Apple menu > About This Mac > More Info
+% Or in terminal: system_profiler SPHardwareDataType
+
+All experiments were conducted on a [YOUR MACHINE, e.g., Apple MacBook Pro] with a [CPU MODEL] processor running at [CLOCK SPEED] GHz, [RAM SIZE] GB of DRAM, and [CACHE SIZE] MB of cache memory. The Java implementations were compiled and executed using Java 21 (OpenJDK), with each algorithm averaged over 10 runs to reduce measurement noise, consistent with the methodology of the original paper \cite{llmgen2025}.
+
+\subsection{LLMs Used}
+
+We evaluated the following three LLMs:
+
+\textbf{[LLM 1, e.g., OpenAI ChatGPT o4-mini-high]:} [1--2 sentences describing it and why you chose it.]
+
+\textbf{[LLM 2, e.g., Anthropic Claude Sonnet 4]:} [1--2 sentences describing it and why you chose it.]
+
+\textbf{[LLM 3, e.g., Google Gemini 2.5 Pro]:} [1--2 sentences describing it and why you chose it.]
+
+Each LLM was cold-started before each prompt, consistent with the methodology of Barati Nia et al.\ \cite{llmgen2025}. The prompts used in our experiments are shown below.
+
+\textbf{Optimization Approach Prompt (adapted from \cite{llmgen2025}, Fig.\ 1):}
+\begin{lstlisting}
+The attached code implements triangle counting in a graph given in CSR format. Write a Java method fast() with the API below that is the fastest sequential triangle counting code you can generate.
+
+public static long fast(Graph graph)
+
+Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
+\end{lstlisting}
+
+\textbf{Algorithm-Synthesis Approach Prompt (adapted from \cite{llmgen2025}, Fig.\ 2):}
+\begin{lstlisting}
+The attached C files implement a graph in CSR format. Write a Java method fast() with the API below that is the fastest sequential implementation for finding the {ALGORITHM} of a graph that integrates into the attached Java infrastructure files:
+
+public static long fast(Graph graph)
+
+Attached C Files: (bfs.c, graph.c, main.c, queue.c)
+Attached Java Files: (Graph.java, BFS.java, Queue.java, Main.java)
+\end{lstlisting}
+
+Where \texttt{\{ALGORITHM\}} is replaced by ``number of triangles'', ``diameter'', and ``clique number''.
+
+\subsection{Optimization Approach Results}
+
+% Fill in after running experiments.
+% Record: compilable (yes/no), correct (yes/no),
+% # triangles on RMAT-18 (should be 101,930,789),
+% runtime on RMAT-18 (seconds), and techniques used.
+
+Table~\ref{tab:optimization} summarizes the results of the optimization approach on RMAT-18.
+
+\begin{table}[h]
+\centering
+\caption{Comparative Overview --- Optimization Approach (RMAT-18)}
+\label{tab:optimization}
+\begin{tabular}{lcccccc}
+\toprule
+Model & Compilable & Correct & \# Triangles & Runtime (s) & Sort & Hash \\
+\midrule
+{[LLM 1]} & & & & & & \\
+{[LLM 2]} & & & & & & \\
+{[LLM 3]} & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Compare with the paper's Table III.
+% Did the LLMs produce correct triangle counts?
+% How did Java runtimes compare to C runtimes?
+
+[FILL IN DISCUSSION OF OPTIMIZATION RESULTS HERE]
+
+\subsection{Algorithm-Synthesis Approach Results}
+
+\subsubsection{Ready-To-Use (RTU) Capability}
+
+% RTU = compiles without modification + correct output + runs within reasonable time.
+% Your RTU% = (number of RTU algorithms out of 3) * 100
+% e.g. if 2 out of 3 algorithms are RTU: 67%
+
+Following Barati Nia et al.\ \cite{llmgen2025}, we define a result as Ready-To-Use (RTU) if the generated code: (1) compiles successfully without manual modifications, (2) produces correct output on all test cases, and (3) runs within an acceptable time threshold. Table~\ref{tab:rtu} reports the RTU percentage for each model across the three algorithm tasks.
+
+\begin{table}[h]
+\centering
+\caption{RTU Percentage for Each Model}
+\label{tab:rtu}
+\begin{tabular}{lc}
+\toprule
+Model & RTU Percentage \\
+\midrule
+{[LLM 1]} & \% \\
+{[LLM 2]} & \% \\
+{[LLM 3]} & \% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Compare with Table I of the paper.
+% Are Java RTU rates higher or lower than C? Why?
+
+[FILL IN DISCUSSION OF RTU RESULTS HERE]
+
+\subsubsection{Efficiency Rates}
+
+% For each RTU result compute:
+%   rate = 1 / (t * m)
+% where t = relative runtime (fastest implementation = 1.0)
+%       m = relative peak memory (lowest memory = 1.0)
+% Sum rates across all algorithms for the total score.
+% Non-RTU results contribute 0 to the total.
+
+Table~\ref{tab:efficiency} shows the combined efficiency rates for each model, computed as the sum of $1/(t \cdot m)$ across all RTU algorithm implementations, where $t$ is the relative runtime and $m$ is the relative peak memory usage \cite{llmgen2025}.
+
+\begin{table}[h]
+\centering
+\caption{Efficiency Rates}
+\label{tab:efficiency}
+\begin{tabular}{lc}
+\toprule
+Model & Efficiency Rate \\
+\midrule
+{[LLM 1]} & \\
+{[LLM 2]} & \\
+{[LLM 3]} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Compare with Table II of the paper.
+% Which model performed best and why?
+
+[FILL IN DISCUSSION OF EFFICIENCY RESULTS HERE]
+
+\subsection{Discussion}
+
+% This is where you earn the insight points (worth a lot!).
+% Address these questions:
+% 1. How did Java results compare to the paper's C results?
+% 2. Were RTU rates higher or lower in Java? Why?
+% 3. Did the same LLMs that did well in C also do well here?
+% 4. What challenges arise from cross-language generation?
+% 5. Any surprising results worth highlighting?
+
+[FILL IN YOUR ANALYSIS AND INSIGHTS HERE]
+
+%---------------------------------------------------------------
+% 3. SUMMARY AND CONCLUSIONS
+%---------------------------------------------------------------
+\section{Summary and Conclusions}
+\label{sec:conclusions}
+
+% (~200 words)
+% Restate main findings, cross-language insight,
+% and suggest 1-2 future extensions.
+
+This project evaluated three LLMs on their ability to generate efficient Java graph algorithm implementations when provided with C source files as context. [SUMMARIZE YOUR MAIN FINDINGS HERE].
+
+These results suggest that [YOUR INSIGHT ABOUT CROSS-LANGUAGE GENERATION]. Compared to the original paper's C results \cite{llmgen2025}, [YOUR COMPARISON].
+
+Future extensions of this work could include: (1) testing additional LLMs or more recent model versions; (2) evaluating parallel Java implementations using \texttt{ForkJoinPool}; or (3) expanding the algorithm suite to include vertex and edge connectivity as tested in the full paper \cite{llmgen2025}.
+
+%---------------------------------------------------------------
+% ACKNOWLEDGEMENTS
+%---------------------------------------------------------------
+\section*{Acknowledgements}
+
+% YOU MUST fill this in --- required by the honour code.
+% List every AI tool used and exactly what for.
+
+The author used Claude (Anthropic) to assist with the translation of C infrastructure files into Java (\texttt{Graph.java}, \texttt{BFS.java}, \texttt{Queue.java}, \texttt{Main.java}), for guidance on project setup and Java compilation, and to generate this \LaTeX\ report skeleton. All experimental results, analysis, and written content are the author's own work.
+
+%---------------------------------------------------------------
+% REFERENCES
+%---------------------------------------------------------------
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
