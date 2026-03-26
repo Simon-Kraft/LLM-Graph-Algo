@@ -12,7 +12,7 @@ Two experimental approaches are evaluated:
 
 **Task 2 — Algorithm-Synthesis Approach:** Each LLM is given only the graph infrastructure (no algorithm code) and asked to implement three algorithms from scratch: Triangle Counting, Diameter Finding, and Clique Number.
 
-Results are compared against the original paper's findings using the same RMAT synthetic graph benchmark suite (scales 6–15).
+Results are compared against the original paper's findings using the same RMAT synthetic graph benchmark suite (scales 6–14).
 
 ## Folder Structure
 
@@ -76,7 +76,7 @@ This recursively finds and compiles all `.java` files from `src/` into `bin/`.
 ./run.sh -r <scale>
 ```
 
-**All scales at once (RMAT 6–15):**
+**All scales at once (RMAT 6–14):**
 ```bash
 ./run.sh -a
 ```
@@ -106,7 +106,7 @@ This recursively finds and compiles all `.java` files from `src/` into `bin/`.
 | Flag | Description |
 |------|-------------|
 | `-r SCALE` | Run single RMAT graph of given scale (must be ≥ 6) |
-| `-a` | Run all scales from 6 to 15 |
+| `-a` | Run all scales from 6 to 14 |
 | `-f <file>` | Read graph from Matrix Market format file |
 | `-o <file>` | Save output to file (appends if file exists) |
 | `-q` | Quiet mode — suppress section headers |
@@ -126,7 +126,6 @@ This recursively finds and compiles all `.java` files from `src/` into `bin/`.
 | RMAT-12 | 4,096 | 65,536 |
 | RMAT-13 | 8,192 | 131,072 |
 | RMAT-14 | 16,384 | 262,144 |
-| RMAT-15 | 32,768 | 524,288 |
 
 > **Note:** Triangle counts vary per run since RMAT uses a random seed. Set a fixed seed in `Graph.java` for reproducible results.
 
