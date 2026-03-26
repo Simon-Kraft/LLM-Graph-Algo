@@ -83,41 +83,25 @@ We evaluated the following three LLMs:
 
 Each LLM was cold-started before each prompt, consistent with the methodology of Barati Nia et al.\ \cite{llmgen2025}. The prompts used in our experiments are shown below.
 
-\textbf{Optimization Approach Prompt (adapted from \cite{llmgen2025}, Fig.\ 1):}
+\textbf{Optimization Approach (adapted from \cite{llmgen2025}, Fig.\ 1):}
+
 \begin{lstlisting}
-The attached code implements triangle counting in a graph given in CSR format. Write a Java method tc_fast() with the API below that is the fastest sequential triangle counting code you can generate.
+The attached C code implements triangle counting in a graph given in CSR format. Suppose this whole framework is already translated to Java. Write a Java method tc_fast() with the API below that is the fastest sequential triangle counting code you can generate:
 
 public static long tc_fast(Graph graph)
 
-Attached C Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
-Attached Java Files: (BFS.java, Graph.java, Main.java, Queue.java, TC.java)
+Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
 \end{lstlisting}
 
 \vspace{2em}
 
-\textbf{Novel: Optimization Approach Prompt using C to generate Java:}
-
+\textbf{Algorithm-Synthesis Approach (adapted from \cite{llmgen2025}, Fig.\ 2):}
 \begin{lstlisting}
-The attached C code implements triangle counting in a graph given in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential triangle counting code you can generate
-
-public static long tc_fast(Graph graph)
-
-Attached C Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
-\end{lstlisting}
-
-\vspace{2em}
-
-
-
-
-\textbf{Algorithm-Synthesis Approach Prompt (adapted from \cite{llmgen2025}, Fig.\ 2):}
-\begin{lstlisting}
-The attached C files implement a graph in CSR format. Write a Java method fast() with the API below that is the fastest sequential implementation for finding the {ALGORITHM} of a graph that integrates into the attached Java infrastructure files:
+The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential implementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
 
 public static long fast(Graph graph)
 
-Attached C Files: (bfs.c, graph.c, main.c, queue.c)
-Attached Java Files: (BFS.java, Graph.java, Main.java, Queue.java)
+Attached Files: (bfs.c, graph.c, main.c, queue.c)
 \end{lstlisting}
 
 Where \texttt{\{ALGORITHM\}} is replaced by ''number of triangles'', ''diameter'', and ''clique number''.
