@@ -82,9 +82,10 @@ Each LLM was cold-started before each prompt, consistent with the methodology of
 \begin{lstlisting}
 The attached code implements triangle counting in a graph given in CSR format. Write a Java method fast() with the API below that is the fastest sequential triangle counting code you can generate.
 
-public static long fast(Graph graph)
+public static long tc_fast(Graph graph)
 
-Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
+Attached C Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
+Attached Java Files: (BFS.java, Graph.java, Main.java, Queue.java, TC.java)
 \end{lstlisting}
 
 \textbf{Algorithm-Synthesis Approach Prompt (adapted from \cite{llmgen2025}, Fig.\ 2):}
@@ -94,10 +95,10 @@ The attached C files implement a graph in CSR format. Write a Java method fast()
 public static long fast(Graph graph)
 
 Attached C Files: (bfs.c, graph.c, main.c, queue.c)
-Attached Java Files: (Graph.java, BFS.java, Queue.java, Main.java)
+Attached Java Files: (BFS.java, Graph.java, Main.java, Queue.java)
 \end{lstlisting}
 
-Where \texttt{\{ALGORITHM\}} is replaced by ``number of triangles'', ``diameter'', and ``clique number''.
+Where \texttt{\{ALGORITHM\}} is replaced by ''number of triangles'', ''diameter'', and ''clique number''.
 
 \subsection{Optimization Approach Results}
 
