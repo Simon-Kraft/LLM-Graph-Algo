@@ -1,8 +1,9 @@
+% !TEX root = report.tex
 % ---------------------------------------------------------------
 % PREAMBLE
 % ---------------------------------------------------------------
-\documentclass[12pt, onecolumn]{article}
 
+\documentclass[12pt, onecolumn]{article}
 % Page layout
 \usepackage[margin=1in]{geometry}
 \usepackage{setspace}
@@ -33,11 +34,29 @@
     columns=fullflexible,
 }
 
+% Bibliography
+\usepackage[
+    backend=biber, 
+    style=ieee,
+    maxnames=1,
+    giveninits=true, 
+    doi=true,
+    isbn=false
+]{biblatex}
+\addbibresource{references.bib}
+
 % Hyperlinks (load last)
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    linkcolor=black,
-    citecolor=black,
-    urlcolor=blue,
-}
+\usepackage[unicode=true]{hyperref} % enables use of metadata for pdfs and hyperlinks within a document
+\hypersetup{%colorlinks=true
+% activate this part for the boxes 
+colorlinks=false, %flag for prints
+pdfborder={0 0 1}, % thickness of box
+linkbordercolor={1 0 0},
+% activate this part to not have the boxes
+% hidelinks,  % this option would hide links for the print version of your thesis
+% linkcolor=red!35!black,    %definition of the link color
+% citecolor=green!35!black,  %definition of the cite color
+% urlcolor=magenta!35!black, %definition of the url color
+pdfauthor=Simon Kraft, % Optional: Specify the author of the pdf
+pdftitle=Cross-Language Code Generation   % Optional: Specify the title within the pdf
+} 

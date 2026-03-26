@@ -12,13 +12,13 @@ public class Main {
     private static final int LOOP_CNT     = 10;
     private static final int SCALE_MIN    = 6;
     private static final int SCALE_START  = 6;
-    private static final int SCALE_END    = 12;
+    private static final int SCALE_END    = 14;
 
     // Reference scales for Table II / Table III (matching the paper)
-    private static final int TC_REF_SCALE     = 15;  // Triangle counting reference
-    private static final int DIAM_REF_SCALE   = 15;  // Diameter reference
-    private static final int CLIQUE_REF_SCALE = 12;  // Clique number reference
-    private static final int OPT_REF_SCALE    = 15;  // Optimization approach reference
+    private static final int OPT_REF_SCALE    = 14;  // Optimization approach reference
+    private static final int TC_REF_SCALE     = 14;  // Triangle counting reference
+    private static final int DIAM_REF_SCALE   = 14;  // Diameter reference
+    private static final int CLIQUE_REF_SCALE = 8;  // Clique number reference
 
     static boolean QUIET         = false;
     static boolean PRINT         = false;
@@ -364,7 +364,7 @@ public class Main {
         // ============================================================
         // TASK 1: OPTIMIZATION APPROACH (Triangle Counting only)
         // LLMs given all existing TC code — attach bfs.c, graph.c,
-        // main.c, queue.c, tc.c + Java files
+        // main.c, queue.c, tc.c
         // ============================================================
         if (!QUIET) outfile.println("--- Task 1: Optimization Approach ---");
 
@@ -383,7 +383,7 @@ public class Main {
         // ============================================================
         // TASK 2A: ALGORITHM-SYNTHESIS — Triangle Counting
         // LLMs given only graph infrastructure — attach bfs.c, graph.c,
-        // main.c, queue.c + Java files, NO tc.c
+        // main.c, queue.c
         // ============================================================
         if (!QUIET) outfile.println("--- Task 2a: Algorithm-Synthesis - Triangle Counting ---");
 
@@ -402,13 +402,13 @@ public class Main {
         // ============================================================
         if (!QUIET) outfile.println("--- Task 2b: Algorithm-Synthesis - Diameter ---");
 
-        // benchmark(DiameterBaseline::compute, originalGraph, graph, "DIAM", "syn_diam_baseline", scale);
-        // long baselineDiam = currentScaleResults.get("DIAM").get(0).result;
-        // allResults.remove(allResults.size() - 1);
-        // currentScaleResults.get("DIAM").clear();
-        // benchmark(DiameterClaude::fast,   originalGraph, graph, "DIAM", "syn_diam_claude",   baselineDiam, scale);
-        // benchmark(DiameterGemini::fast,   originalGraph, graph, "DIAM", "syn_diam_gemini",   baselineDiam, scale);
-        // benchmark(DiameterGPTCodex::fast, originalGraph, graph, "DIAM", "syn_diam_gptcodex", baselineDiam, scale);
+        benchmark(DiameterBaseline::compute, originalGraph, graph, "DIAM", "syn_diam_baseline", scale);
+        long baselineDiam = currentScaleResults.get("DIAM").get(0).result;
+        allResults.remove(allResults.size() - 1);
+        currentScaleResults.get("DIAM").clear();
+        benchmark(DiameterClaude::fast,   originalGraph, graph, "DIAM", "syn_diam_claude",   baselineDiam, scale);
+        benchmark(DiameterGemini::fast,   originalGraph, graph, "DIAM", "syn_diam_gemini",   baselineDiam, scale);
+        benchmark(DiameterGPTCodex::fast, originalGraph, graph, "DIAM", "syn_diam_gptcodex", baselineDiam, scale);
 
         // ============================================================
         // TASK 2C: ALGORITHM-SYNTHESIS — Clique Number
@@ -417,15 +417,15 @@ public class Main {
         // ============================================================
         if (!QUIET) outfile.println("--- Task 2c: Algorithm-Synthesis - Clique Number ---");
 
-        // if (scale <= CLIQUE_REF_SCALE) {
-        //     benchmark(CliqueBaseline::compute, originalGraph, graph, "CLIQUE", "syn_clique_baseline", scale);
-        //     long baselineClique = currentScaleResults.get("CLIQUE").get(0).result;
-        //     allResults.remove(allResults.size() - 1);
-        //     currentScaleResults.get("CLIQUE").clear();
-        //     benchmark(CliqueClaude::fast,   originalGraph, graph, "CLIQUE", "syn_clique_claude",   baselineClique, scale);
-        //     benchmark(CliqueGemini::fast,   originalGraph, graph, "CLIQUE", "syn_clique_gemini",   baselineClique, scale);
-        //     benchmark(CliqueGPTCodex::fast, originalGraph, graph, "CLIQUE", "syn_clique_gptcodex", baselineClique, scale);
-        // }
+        if (scale <= CLIQUE_REF_SCALE) {
+            benchmark(CliqueBaseline::compute, originalGraph, graph, "CLIQUE", "syn_clique_baseline", scale);
+            long baselineClique = currentScaleResults.get("CLIQUE").get(0).result;
+            allResults.remove(allResults.size() - 1);
+            currentScaleResults.get("CLIQUE").clear();
+            benchmark(CliqueClaude::fast,   originalGraph, graph, "CLIQUE", "syn_clique_claude",   baselineClique, scale);
+            benchmark(CliqueGemini::fast,   originalGraph, graph, "CLIQUE", "syn_clique_gemini",   baselineClique, scale);
+            benchmark(CliqueGPTCodex::fast, originalGraph, graph, "CLIQUE", "syn_clique_gptcodex", baselineClique, scale);
+        }
     }
 
     // ================================================================

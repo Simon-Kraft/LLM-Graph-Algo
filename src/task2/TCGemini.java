@@ -1,99 +1,54 @@
 package task2;
 
-import java.util.Arrays;
 import graph.Graph;
 
 public class TCGemini {
-
-    /**
-     * Finds the number of triangles in an undirected graph in CSR format.
-     * Uses a Degree-Ordered Directed Acyclic Graph (DAG) construction
-     * to bound the time complexity to O(E^(1.5)) and eliminate redundant checks.
-     *
-     * @param graph The input graph in CSR format
-     * @return The total number of triangles
-     */
     public static long fast(Graph graph) {
-        int n = graph.numVertices;
-        int[] rowPtr = graph.rowPtr;
-        int[] colInd = graph.colInd;
-
-        // 1. Allocate DAG row pointers
-        int[] dagRowPtr = new int[n + 1];
-        
-        // 2. Compute out-degrees for the DAG
-        // Edge u -> v exists in DAG if degree(u) < degree(v) or (degree(u) == degree(v) && u < v)
-        for (int u = 0; u < n; u++) {
-            int degU = rowPtr[u + 1] - rowPtr[u];
-            int startU = rowPtr[u];
-            int endU = rowPtr[u + 1];
-            int count = 0;
-            
-            for (int i = startU; i < endU; i++) {
-                int v = colInd[i];
-                int degV = rowPtr[v + 1] - rowPtr[v];
-                
-                if (degU < degV || (degU == degV && u < v)) {
-                    count++;
-                }
-            }
-            dagRowPtr[u + 1] = count;
-        }
-        
-        // 3. Prefix sums to set up DAG row pointers
-        for (int u = 0; u < n; u++) {
-            dagRowPtr[u + 1] += dagRowPtr[u];
-        }
-        
-        // 4. Populate DAG column indices
-        // Total edges in DAG will be exactly half of the original undirected edges
-        int[] dagColInd = new int[dagRowPtr[n]];
-        int[] tempPos = new int[n];
-        System.arraycopy(dagRowPtr, 0, tempPos, 0, n);
-        
-        for (int u = 0; u < n; u++) {
-            int degU = rowPtr[u + 1] - rowPtr[u];
-            int startU = rowPtr[u];
-            int endU = rowPtr[u + 1];
-            
-            for (int i = startU; i < endU; i++) {
-                int v = colInd[i];
-                int degV = rowPtr[v + 1] - rowPtr[v];
-                
-                if (degU < degV || (degU == degV && u < v)) {
-                    dagColInd[tempPos[u]++] = v;
-                }
-            }
-        }
-        
-        // 5. Count Triangles using the DAG
         long triangleCount = 0;
         
-        // Marker array to enable O(1) intersection checks (faster than two-pointer scans)
-        int[] marker = new int[n];
-        Arrays.fill(marker, -1);
-        
-        for (int u = 0; u < n; u++) {
-            int startU = dagRowPtr[u];
-            int endU = dagRowPtr[u + 1];
-            
-            // Mark all outgoing neighbors of u in the DAG
-            for (int i = startU; i < endU; i++) {
-                marker[dagColInd[i]] = u;
-            }
-            
-            // For each neighbor v of u
-            for (int i = startU; i < endU; i++) {
-                int v = dagColInd[i];
-                int startV = dagRowPtr[v];
-                int endV = dagRowPtr[v + 1];
+        // Assuming standard CSR field names translated from the C struct.
+        // Adjust 'numVertices', 'rowPtrs', and 'colIdxs' to match your exact Java Graph API.
+        int numVertices = graph.numVertices; 
+        int[] rowPtrs = graph.rowPtr;       // Also commonly called row_offsets
+        int[] colIdxs = graph.colInd;       // Also commonly called edges or column_indices
+
+        for (int u = 0; u < numVertices; u++) {
+            int uStart = rowPtrs[u];
+            int uEnd = rowPtrs[u + 1];
+
+            // Iterate over all neighbors v of vertex u
+            for (int e_u = uStart; e_u < uEnd; e_u++) {
+                int v = colIdxs[e_u];
                 
-                // For each neighbor w of v
-                // If w is marked as a neighbor of u, we found the triangle: u -> v -> w <- u
-                for (int j = startV; j < endV; j++) {
-                    int w = dagColInd[j];
-                    if (marker[w] == u) {
+                // To ensure we only count each triangle exactly once and skip redundant 
+                // checks, we enforce an artificial directed DAG order: u < v < w.
+                // We only process edge (u, v) if u < v.
+                if (v <= u) {
+                    continue;
+                }
+
+                // Because adjacency lists are sorted, all neighbors of u after index 'e_u' 
+                // are strictly greater than v. We start our pointer for u here.
+                int ptrU = e_u + 1;
+                
+                int ptrV = rowPtrs[v];
+                int vEnd = rowPtrs[v + 1];
+
+                // Two-pointer intersection to find common neighbors w
+                while (ptrU < uEnd && ptrV < vEnd) {
+                    int w_u = colIdxs[ptrU];
+                    int w_v = colIdxs[ptrV];
+
+                    if (w_u == w_v) {
+                        // We found a common neighbor w! 
+                        // Because ptrU started after v, we implicitly know w > v.
                         triangleCount++;
+                        ptrU++;
+                        ptrV++;
+                    } else if (w_u < w_v) {
+                        ptrU++;
+                    } else {
+                        ptrV++;
                     }
                 }
             }

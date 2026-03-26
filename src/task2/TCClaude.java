@@ -5,17 +5,13 @@ import graph.Graph;
 public class TCClaude {
 
     /**
-     * Fastest sequential triangle counting using degree-ordered forward hashing.
+     * Fastest sequential triangle counting using forward algorithm
+     * with degree-based ordering and hash-based intersection.
      *
-     * Algorithm:
-     * 1. Orient every edge u→v so that (degree[u] < degree[v]) or
-     *    (degree[u] == degree[v] && u < v). This produces a DAG.
-     * 2. For each vertex u, for each forward neighbor v of u,
-     *    count |forwardNeighbors(u) ∩ forwardNeighbors(v)| using a hash/marker array.
+     * Corresponds to tc_forward_hash_degreeOrder from the C framework.
      *
-     * The hash-based intersection gives O(min(deg,deg)) per edge and avoids
-     * the log factor of binary search or the branch mispredictions of merge-path
-     * on irregular graphs.
+     * The graph must be undirected and stored in CSR format with
+     * fields: numVertices, numEdges, rowPtr[], colInd[].
      */
     public static long fast(Graph graph) {
         final int n = graph.numVertices;
@@ -24,18 +20,16 @@ public class TCClaude {
         final int[] Ai = graph.colInd;
 
         // Step 1: Compute degree for each vertex
-        final int[] degree = new int[n];
+        int[] degree = new int[n];
         for (int i = 0; i < n; i++) {
             degree[i] = Ap[i + 1] - Ap[i];
         }
 
-        // Step 2: Build the forward (oriented) adjacency structure.
-        // An edge u-v is oriented u→v iff (degree[u] < degree[v]) ||
-        // (degree[u] == degree[v] && u < v).
-        // We store this in compact CSR: fwdPtr / fwdInd.
-
-        // Count forward degree for each vertex
-        final int[] fwdDeg = new int[n];
+        // Step 2: Build a "forward" adjacency structure (directed acyclic graph).
+        // For each undirected edge (u, v), orient it u -> v where
+        // degree[u] < degree[v], or (degree[u] == degree[v] && u < v).
+        // Count forward-edges per vertex.
+        int[] fwdDeg = new int[n];
         for (int u = 0; u < n; u++) {
             for (int j = Ap[u]; j < Ap[u + 1]; j++) {
                 int v = Ai[j];
@@ -45,50 +39,47 @@ public class TCClaude {
             }
         }
 
-        // Build prefix sum for forward rowPtr
-        final int[] fwdPtr = new int[n + 1];
+        // Build forward CSR: fwdPtr and fwdInd
+        int[] fwdPtr = new int[n + 1];
         fwdPtr[0] = 0;
         for (int i = 0; i < n; i++) {
             fwdPtr[i + 1] = fwdPtr[i] + fwdDeg[i];
         }
-
-        final int fwdM = fwdPtr[n];
-        final int[] fwdInd = new int[fwdM];
-
-        // Populate forward adjacency lists
-        final int[] pos = new int[n]; // current insertion position per vertex
+        int totalFwd = fwdPtr[n];
+        int[] fwdInd = new int[totalFwd];
+        int[] offset = new int[n]; // current insertion offset per vertex
         for (int u = 0; u < n; u++) {
             for (int j = Ap[u]; j < Ap[u + 1]; j++) {
                 int v = Ai[j];
                 if (degree[u] < degree[v] || (degree[u] == degree[v] && u < v)) {
-                    fwdInd[fwdPtr[u] + pos[u]] = v;
-                    pos[u]++;
+                    fwdInd[fwdPtr[u] + offset[u]] = v;
+                    offset[u]++;
                 }
             }
         }
 
-        // Step 3: Count triangles using hash-based intersection.
-        // For each u, mark all forward neighbors of u in a boolean array,
-        // then for each forward neighbor v of u, scan forward neighbors of v
-        // and count hits.
-        final boolean[] mark = new boolean[n];
+        // Step 3: Count triangles using hash-based intersection on forward neighbors.
+        // For each vertex u, mark u's forward neighbors in a hash (boolean array),
+        // then for each forward neighbor v of u, scan v's forward neighbors w
+        // and check if w is also a forward neighbor of u.
         long count = 0;
+        boolean[] mark = new boolean[n];
 
         for (int u = 0; u < n; u++) {
-            final int uStart = fwdPtr[u];
-            final int uEnd = fwdPtr[u + 1];
+            int uStart = fwdPtr[u];
+            int uEnd = fwdPtr[u + 1];
+            if (uStart == uEnd) continue;
 
             // Mark all forward neighbors of u
             for (int j = uStart; j < uEnd; j++) {
                 mark[fwdInd[j]] = true;
             }
 
-            // For each forward neighbor v of u, check v's forward neighbors
+            // For each forward neighbor v of u
             for (int j = uStart; j < uEnd; j++) {
                 int v = fwdInd[j];
-                final int vStart = fwdPtr[v];
-                final int vEnd = fwdPtr[v + 1];
-                for (int k = vStart; k < vEnd; k++) {
+                // Check v's forward neighbors against u's marks
+                for (int k = fwdPtr[v]; k < fwdPtr[v + 1]; k++) {
                     if (mark[fwdInd[k]]) {
                         count++;
                     }

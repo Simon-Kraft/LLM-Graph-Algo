@@ -11,7 +11,7 @@
 \begin{titlepage}
     \centering
     \vspace*{2cm}
-    {\Huge\bfseries Evaluating LLM-Generated Java Code for Graph Algorithm Analysis\par}
+    {\Huge\bfseries From C to Java: Evaluating LLMs on Cross-Language Graph Algorithm Synthesis\par}
     \vspace{2cm}
     {\Large Simon Kraft\par}
     \vspace{0.5cm}
@@ -28,6 +28,14 @@
 % ABSTRACT
 %---------------------------------------------------------------
 \begin{abstract}
+
+Large language models (LLMs) are increasingly used for code generation and the automation of software development, yet most evaluations focus on high-level programming languages such as Python. This study extends the work \citetitle{llmgen2025} by~\citeauthor{llmgen2025}~\cite{llmgen2025} by examining whether state-of-the-art LLMs are capable of generating efficient \textit{Java} implementations of graph algorithms when provided only with the \textit{C} language source files as context. Our benchmark comprises three LLMs (Anthropic Claude Opus 4.6, Google Gemini 3.1 Pro, and OpenAI GPT-5.3.-Codex) and their code generation is evaluated on two different approaches similar to the previous work. The first optimization approach queries the LLMs to generate the most efficient routine for the problem of finding the number of triangles in a graph, while been give a series of human-written C implementations that solve this problem. The second algorithm-synthesis approach.
+
+
+that examined whether state-of-the-art LLMs are capable of generating efficient C implementations of graph-analysis routines. 
+
+
+
 Large language models (LLMs) are increasingly used to automate software development, yet most evaluations focus on high-level languages such as Python. This project extends the study by Barati Nia et al.\ \cite{llmgen2025} by evaluating whether state-of-the-art LLMs can generate efficient \textit{Java} implementations of graph algorithms when provided only with C language source files as context. We benchmark three LLMs --- OpenAI ChatGPT, Anthropic Claude, and Google Gemini --- using two approaches: an optimization approach for triangle counting and an algorithm-synthesis approach covering triangle counting, diameter finding, and clique number. Using the RMAT synthetic graph benchmark suite (scales 6--18), we evaluate each model's generated code on compilability, correctness, and runtime efficiency. Our results show that [FILL IN KEY RESULT 1] and [FILL IN KEY RESULT 2], providing new insights into LLM cross-language code generation capabilities.
 
 \textbf{What is meant by the novel idea of generating Java code (without knowing the Java benchmark suite), just knowing the C benchmark suite? This would also be a justification of just translating the benchmark files with Claude?}
@@ -96,6 +104,7 @@ Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
 \vspace{2em}
 
 \textbf{Algorithm-Synthesis Approach (adapted from \cite{llmgen2025}, Fig.\ 2):}
+
 \begin{lstlisting}
 The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential implementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
 
@@ -238,7 +247,6 @@ The author used Claude (Anthropic) to assist with the translation of C infrastru
 %---------------------------------------------------------------
 % REFERENCES
 %---------------------------------------------------------------
-\bibliographystyle{IEEEtran}
-\bibliography{references}
+\printbibliography
 
 \end{document}
