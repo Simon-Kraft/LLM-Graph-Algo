@@ -17,15 +17,14 @@ bin/
 results/
 
 # LaTeX build artifacts
-report/*.aux
-report/*.log
-report/*.out
-report/*.toc
-report/*.bbl
-report/*.blg
-report/*.fls
-report/*.fdb_latexmk
-report/*.synctex.gz
-report/*.bcf
-report/*.run.xml
-!report/build/report.pdf
+report/build/*.aux
+report/build/*.log
+report/build/*.out
+report/build/*.toc
+report/build/*.bbl
+report/build/*.blg
+report/build/*.fls
+report/build/*.fdb_latexmk
+report/build/*.synctex.gz
+report/build/*.bcf
+report/build/*.run.xml

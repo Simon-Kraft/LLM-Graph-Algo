@@ -1,5 +1,6 @@
 \input{preamble}
 
+% 1.0 line spacing (normal)
 \singlespacing
 
 \begin{document}
@@ -28,6 +29,10 @@
 %---------------------------------------------------------------
 \begin{abstract}
 Large language models (LLMs) are increasingly used to automate software development, yet most evaluations focus on high-level languages such as Python. This project extends the study by Barati Nia et al.\ \cite{llmgen2025} by evaluating whether state-of-the-art LLMs can generate efficient \textit{Java} implementations of graph algorithms when provided only with C language source files as context. We benchmark three LLMs --- OpenAI ChatGPT, Anthropic Claude, and Google Gemini --- using two approaches: an optimization approach for triangle counting and an algorithm-synthesis approach covering triangle counting, diameter finding, and clique number. Using the RMAT synthetic graph benchmark suite (scales 6--18), we evaluate each model's generated code on compilability, correctness, and runtime efficiency. Our results show that [FILL IN KEY RESULT 1] and [FILL IN KEY RESULT 2], providing new insights into LLM cross-language code generation capabilities.
+
+\textbf{What is meant by the novel idea of generating Java code (without knowing the Java benchmark suite), just knowing the C benchmark suite? This would also be a justification of just translating the benchmark files with Claude?}
+
+
 \end{abstract}
 
 \newpage
@@ -80,13 +85,30 @@ Each LLM was cold-started before each prompt, consistent with the methodology of
 
 \textbf{Optimization Approach Prompt (adapted from \cite{llmgen2025}, Fig.\ 1):}
 \begin{lstlisting}
-The attached code implements triangle counting in a graph given in CSR format. Write a Java method fast() with the API below that is the fastest sequential triangle counting code you can generate.
+The attached code implements triangle counting in a graph given in CSR format. Write a Java method tc_fast() with the API below that is the fastest sequential triangle counting code you can generate.
 
 public static long tc_fast(Graph graph)
 
 Attached C Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
 Attached Java Files: (BFS.java, Graph.java, Main.java, Queue.java, TC.java)
 \end{lstlisting}
+
+\vspace{2em}
+
+\textbf{Novel: Optimization Approach Prompt using C to generate Java:}
+
+\begin{lstlisting}
+The attached C code implements triangle counting in a graph given in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential triangle counting code you can generate
+
+public static long tc_fast(Graph graph)
+
+Attached C Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
+\end{lstlisting}
+
+\vspace{2em}
+
+
+
 
 \textbf{Algorithm-Synthesis Approach Prompt (adapted from \cite{llmgen2025}, Fig.\ 2):}
 \begin{lstlisting}
