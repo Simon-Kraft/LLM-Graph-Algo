@@ -4,7 +4,7 @@ A Java benchmarking project for evaluating LLM-generated graph algorithms, repli
 
 ## Project Overview
 
-This project evaluates how well three large language models (OpenAI ChatGPT, Anthropic Claude Opus 4.6, and Google Gemini 3.1 Pro) can generate efficient **Java** implementations of graph algorithms when given C-language infrastructure as context. This is the key novelty compared to the original paper: LLMs are prompted to generate Java code while all provided context files are written in C.
+This project evaluates how well three large language models (OpenAI GPT-5.3-Codex, Anthropic Claude Opus 4.6, and Google Gemini 3.1 Pro) can generate efficient **Java** implementations of graph algorithms when given C-language infrastructure as context. This is the key novelty compared to the original paper: LLMs are prompted to generate Java code while all provided context files are written in C.
 
 Two experimental approaches are evaluated:
 
@@ -91,11 +91,6 @@ This recursively finds and compiles all `.java` files from `src/` into `bin/`.
 ./run.sh -r 10 -o results/test.txt
 ```
 
-**Read graph from Matrix Market file:**
-```bash
-./run.sh -f path/to/graph.mtx
-```
-
 **Quiet mode (data rows only, no section headers):**
 ```bash
 ./run.sh -a -q -o results/experiment.txt
@@ -107,11 +102,8 @@ This recursively finds and compiles all `.java` files from `src/` into `bin/`.
 |------|-------------|
 | `-r SCALE` | Run single RMAT graph of given scale (must be ≥ 6) |
 | `-a` | Run all scales from 6 to 14 |
-| `-f <file>` | Read graph from Matrix Market format file |
 | `-o <file>` | Save output to file (appends if file exists) |
 | `-q` | Quiet mode — suppress section headers |
-| `-d` | Print the graph adjacency structure |
-| `-x` | Skip N³ algorithms |
 
 ### RMAT Graph Sizes
 
@@ -140,7 +132,7 @@ TC_SYN  RMAT-10   1024      16384   syn_tc_claude       0.002119    184188   0.8
 
 | Column | Description |
 |--------|-------------|
-| `TYPE` | `TC_OPT` = Task 1, `TC_SYN` = Task 2 triangle counting, `DIAM` = diameter, `CLIQUE` = clique number |
+| `TYPE` | `TC_OPT` = Task 1, `TC_SYN` = Task 2 triangle counting, `DIAM_SYN` = Task 2 diameter, `CLIQUE_SYN` = Task 2 clique number |
 | `GRAPH` | Graph identifier |
 | `VERTICES` | Number of vertices |
 | `EDGES` | Number of undirected edges |
@@ -166,31 +158,6 @@ results/
 mkdir -p results
 ./run.sh -a -o results/experiment_$(date +%Y%m%d_%H%M).txt
 ```
-
-### Checking Correctness
-
-All implementations must agree on the triangle count to be considered correct. The `syn_tc_baseline` is the brute-force ground truth. You can quickly check agreement with:
-
-```bash
-grep "TC_SYN" results/experiment_20260325_1637.txt | awk '{print $5, $7}'
-```
-
-All `RESULT` values for the same scale should be identical across all implementations.
-
-### Computing RTU and Efficiency Rates
-
-An implementation is **Ready-To-Use (RTU)** if it:
-1. Compiled without manual modifications
-2. Produces correct output (matches baseline)
-3. Runs within an acceptable time threshold
-
-The **efficiency rate** for an RTU implementation is:
-
-```
-rate = 1 / (t × m)
-```
-
-where `t` = relative runtime (fastest = 1.0) and `m` = relative peak memory (lowest = 1.0). Non-RTU implementations score 0. The total score per model is the sum of rates across all algorithms.
 
 ## LLMs Evaluated
 

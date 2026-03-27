@@ -69,6 +69,36 @@ Only Gemini 3.1 Pro produced correct results on all tested scales.
 
 ---
 
+## Timeliness Results
+
+### Triangle Counting
+
+All three LLM implementation finish in well under 1 second even at the largest RMAT-14 graphs.
+
+| Model | Timeliness |
+|-------|----------------------|
+| Claude Opus 4.6 | ✅ Yes |
+| Gemini 3.1 Pro | ✅ Yes |
+| GPT-5.3-Codex | ✅ Yes |
+
+
+### Diameter Finding
+
+GPT-5.3.-Codex produces a solution that is feasible on smaller graphs. However on the RMAT-14 graph, the Claude's implementation runs in just 0.010s, while GPT-5.3.-Codex takes over 16 seconds. Therefore, it does not fulfill timeliness.
+
+| Model | Timeliness |
+|-------|----------------------|
+| Claude Opus 4.6 | ✅ Yes |
+| Gemini 3.1 Pro | ✅ Yes |
+| GPT-5.3-Codex | ❌ No (gets particularly bad, when graph size is large) |
+
+
+### Clique Number
+
+As Gemini is the only LLM that generated a algorithm that correctly identifies the number of cliques in a graph, it is not punished for its longer runtime compared to the versions of the other two LLMs which were not able to correctly identify the largest clique in a graph.
+
+---
+
 ## RTU Status per Model per Algorithm
 
 Combining compilability and correctness:
@@ -77,7 +107,7 @@ Combining compilability and correctness:
 |-------|------------------|----------|---------------|
 | Claude Opus 4.6 | ✅ | ❌ (compilability) | ❌ (correctness) |
 | Gemini 3.1 Pro | ❌ (compilability) | ✅ | ✅ |
-| GPT-5.3-Codex | ❌ (compilability) | ✅ | ❌ (compilability + correctness) |
+| GPT-5.3-Codex | ❌ (compilability) | ❌ (timeliness) | ❌ (compilability + correctness) |
 
 ---
 
@@ -88,7 +118,7 @@ RTU% = (number of RTU algorithms) / (total algorithms tested) × 100
 With 3 algorithms tested (Triangle Counting, Diameter, Clique Number):
 
 ### Claude Opus 4.6
-- RTU algorithms: **0** (Triangle Counting ✅, Diameter ❌, Clique ❌)
+- RTU algorithms: **1** (Triangle Counting ✅, Diameter ❌, Clique ❌)
 - RTU% = 1/3 × 100 = **33%**
 
 ### Gemini 3.1 Pro
@@ -96,8 +126,8 @@ With 3 algorithms tested (Triangle Counting, Diameter, Clique Number):
 - RTU% = 2/3 × 100 = **67%**
 
 ### GPT-5.3-Codex
-- RTU algorithms: **1** (Triangle Counting ❌, Diameter ✅, Clique ❌)
-- RTU% = 1/3 × 100 = **33%**
+- RTU algorithms: **0** (Triangle Counting ❌, Diameter ❌, Clique ❌)
+- RTU% = 0/3 × 100 = **0%**
 
 ### Summary Table
 
@@ -105,6 +135,6 @@ With 3 algorithms tested (Triangle Counting, Diameter, Clique Number):
 |-------|---------------|-----------------|----------------|
 | Anthropic Claude Opus 4.6 | 1 | 3 | **33%** |
 | Google Gemini 3.1 Pro | 2 | 3 | **67%** |
-| OpenAI GPT-5.3-Codex | 1 | 3 | **33%** |
+| OpenAI GPT-5.3-Codex | 0 | 3 | **0%** |
 
 ---
