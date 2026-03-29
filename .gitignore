@@ -28,3 +28,5 @@ report/build/*.fdb_latexmk
 report/build/*.synctex.gz
 report/build/*.bcf
 report/build/*.run.xml
+
+.venv
