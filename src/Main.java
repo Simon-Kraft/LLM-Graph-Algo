@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import graph.Graph;
 import task1.*;
 import task2.*;
+import misc.SystemInfo;
 
 public class Main {
 
@@ -508,6 +509,7 @@ public class Main {
 
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         if (!QUIET) {
+            SystemInfo.print(outfile);
             outfile.println("# LLM Graph Algorithm Benchmark");
             outfile.println("# Run: " + timestamp);
             outfile.println("# Scales: " + SCALE_START + " to " + SCALE_END);
