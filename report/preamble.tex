@@ -36,27 +36,32 @@
 
 % Bibliography
 \usepackage[
-    backend=biber, 
-    style=ieee,
-    maxnames=1,
-    giveninits=true, 
-    doi=true,
-    isbn=false
-]{biblatex}
+natbib,
+maxnames=99,
+minnames=1,
+maxbibnames=99, % change this to adjust the number of names to be shown in the references
+style=numeric,
+sortcites=true,
+uniquename=init,
+giveninits,
+doi=false,
+backend=biber,
+backref,
+hyperref]{biblatex}
 \addbibresource{references.bib}
 
-% Hyperlinks (load last)
-\usepackage[unicode=true]{hyperref} % enables use of metadata for pdfs and hyperlinks within a document
-\hypersetup{%colorlinks=true
-% activate this part for the boxes 
-colorlinks=false, %flag for prints
-pdfborder={0 0 1}, % thickness of box
-linkbordercolor={1 0 0},
-% activate this part to not have the boxes
-% hidelinks,  % this option would hide links for the print version of your thesis
-% linkcolor=red!35!black,    %definition of the link color
-% citecolor=green!35!black,  %definition of the cite color
-% urlcolor=magenta!35!black, %definition of the url color
+
+\usepackage[colorlinks=true, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
+
+\hypersetup{
 pdfauthor=Simon Kraft, % Optional: Specify the author of the pdf
 pdftitle=Cross-Language Code Generation   % Optional: Specify the title within the pdf
-} 
+}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\pagestyle{fancy}
+\rhead{Simon Kraft}
+\lhead{LLM Graph Algorithm Benchmark}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14.49998pt}

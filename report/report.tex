@@ -44,26 +44,34 @@ Large language models (LLMs) are increasingly used to automate software developm
 \end{abstract}
 
 \newpage
+\tableofcontents
+\newpage
 
 %---------------------------------------------------------------
 % 1. INTRODUCTION
 %---------------------------------------------------------------
 \section{Introduction}
 
-% (~300-400 words)
-% - Why is LLM code generation interesting?
-% - Why does it matter that we test Java with C input?
-% - Briefly describe what you did and outline the report.
+\subsection{Motivation}
 
-The rapid growth of large language models (LLMs) has opened new possibilities for automated software development. Recent work has begun to evaluate not just whether LLM-generated code is correct, but whether it is \textit{efficient} --- particularly for performance-critical applications \cite{llmgen2025, effibench2024}.
+Large language models (LLMs) have seen broad adoption across nearly every sector, assisting with tasks ranging from natural language understanding to complex reasoning and software development~\cite{chang2024survey}. One of their most impactful applications is code generation, where they help programmers by automating development tasks and reducing human error~\cite{llmgen2025}. While most existing benchmarks such as HumanEval~\cite{chen2021evaluatinglargelanguagemodels} and MBPP~\cite{austin2021programsynthesislargelanguage} focus primarily on correctness and functionality, the performance of written code in terms of memory footprint and runtime efficiency is largely overlooked. However, in scientific computing and graph analysis small algorithmic can result in a reduction of runtime and energy consumption by orders of magnitude~\cite{llmgen2025}.
 
-A key open question is how LLMs handle cross-language code generation: can a model generate efficient code in one language (Java) when all provided context is written in another (C)? This is a practically important scenario, as many legacy systems are written in C while new development often targets higher-level languages. Evaluating this capability provides insight into LLMs' true algorithmic reasoning ability, separating genuine understanding from simple pattern matching.
+\citeauthor{llmgen2025}~\cite{llmgen2025} addressed this gap by benchmarking eight state-of-the art LLMs on their ability to generate efficient C implementations of algorithms for graph analysis. To reduce the risk of models simply reproducing memorized training data, each LLM is supplied with the C source files of an existing benchmark suite~\cite{bader2023tc} and require the generate code to integrate into it. Their results shows that contemporary LLMs can produce generative implementations, often surpassing human-written baselines~\cite{llmgen2025}.
 
-This project replicates and extends the experimental evaluation of Barati Nia et al.\ \cite{llmgen2025}, which benchmarked eight LLMs generating C implementations of graph algorithms. We instead prompt three LLMs --- [LLM 1], [LLM 2], and [LLM 3] --- to generate Java implementations while providing only C source files as context, using the same RMAT benchmark graphs \cite{rmat2004} ranging from scale 6 to 18.
 
-We chose these three LLMs because [MOTIVATE YOUR CHOICE HERE --- e.g., they represent the three dominant commercial AI providers, they are publicly accessible, and they scored competitively in the original paper].
+\subsection{Cross-Language Code Generation}
 
-The remainder of this report is organized as follows. Section~\ref{sec:testing} describes the experimental setup, testing environment, and results. Section~\ref{sec:conclusions} summarizes our findings and suggests directions for future work.
+A natural extension of their work is to evaluate LLMs when the target language differs from the language of the provided context~\cite{llmgen2025}. This scenario of cross-language code generation is practically relevant, as many legacy systems are running on lower-level languages such as C or COBAL, while recent software development targets higher-level languages such as Java or Python~\cite{cobol2000}. In this setup, the LLM must have a thorough understanding of the underlying algorithms and data structures in order to produce a valid implementation independently, without relying on the provided context language.
+
+\subsection{Contribution}
+
+This work extends the evaluation of \citeauthor{llmgen2025} under the cross-language setting described in the previous section. Three state-of-the-art LLMs are prompted to generate Java implementations of graph algorithms while only C code is provided as context. It is important to note that no Java infrastructure is supplied. Each model must imagine how the C benchmark suite would look when translated to Java and generate code that integrates into this framework. This makes the evaluation strictly harder than same-language generation.
+
+Similar to~\cite{llmgen2025}, two distinct approaches are evaluated. First, an optimization approach for triangle counting that evaluates the performance of LLMs to outperform existing benchmarks. Second, an algorithm synthesis approach covering triangle counting, diameter finding, and clique number. Both approaches are evaluated using RMAT benchmark graphs~\cite{rmat2004} at scales 6 to 14. Each implementation is evaluated on compilability, correctness, execution time, and memory usage, following the methodology of the original paper. 
+
+\subsection{Report Structure}
+
+The remainder of this report is organized as follows. Section~\ref{sec:testing} describes the experimental setup, the evaluated LLMs, the used prompts. Additionally, the obtained numerical results are reported and compared with the results from the original paper~\cite{llmgen2025}. Section~\ref{sec:conclusions} summarizes our findings, discusses the implications of cross-language code generation, and suggests directions for future work.
 
 %---------------------------------------------------------------
 % 2. NUMERICAL TESTING
@@ -73,9 +81,10 @@ The remainder of this report is organized as follows. Section~\ref{sec:testing} 
 
 \subsection{Testing Environment}
 
-All experiments were conducted on a Apple MacBook Pro with an Apple M3 chip featuring 8 cores, 4 performance cores at 4.05 GHz and 4 efficiency at 2.75 GHz. The operating system dynamically schedules workloads across the cores depending on load. The machine has 16 GB of DRAM and 16 MB 
+All experiments were conducted on an Apple MacBook Pro with an Apple M3 chip featuring 4 performance cores running at up to 4.05 GHz and 4 efficiency cores running at up to 2.75 GHz, with 16 GB of unified DRAM. The performance cores feature 192 KB of L1 instruction cache, 128 KB of L1 data cache, and a shared 16 MB L2 cache. The efficiency cores feature 128 KB of L1 instruction cache, 64 KB of L1 data cache, and a shared 4 MB L2 cache. The cache line size is 128 bytes. Java implementations were compiled and executed using Java 21 (Hotspot JVM, build 21.0.10). Each algorithm is averaged over 10 runs to smooth out measurement noise, consistent with the methodology of the original paper~\cite{llmgen2025}. Note that absolute runtime results are not comparable with the original study which used an AMD EPYC 7753 server at 2.45 GHz with 512 GB of RAM~\cite{llmgen2025}. 
 
-All experiments were conducted on a [YOUR MACHINE, e.g., Apple MacBook Pro] with a [CPU MODEL] processor running at [CLOCK SPEED] GHz, [RAM SIZE] GB of DRAM, and [CACHE SIZE] MB of cache memory. The Java implementations were compiled and executed using Java 21 (OpenJDK), with each algorithm averaged over 10 runs to reduce measurement noise, consistent with the methodology of the original paper \cite{llmgen2025}.
+
+
 
 \subsection{LLMs Used}
 
