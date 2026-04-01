@@ -29,7 +29,7 @@
 %---------------------------------------------------------------
 \begin{abstract}
 
-Large language models (LLMs) are increasingly used for code generation and the automation of software development, yet most evaluations focus on high-level programming languages such as Python. This study extends the work \citetitle{llmgen2025} by~\citeauthor{llmgen2025}~\cite{llmgen2025} by examining whether state-of-the-art LLMs are capable of generating efficient \textit{Java} implementations of graph algorithms when provided only with the \textit{C} language source files as context. Our benchmark comprises three LLMs (Anthropic Claude Opus 4.6, Google Gemini 3.1 Pro, and OpenAI GPT-5.3.-Codex) and their code generation is evaluated on two different approaches similar to the previous work. The first optimization approach queries the LLMs to generate the most efficient routine for the problem of finding the number of triangles in a graph, while been give a series of human-written C implementations that solve this problem. The second algorithm-synthesis approach.
+Large language models (LLMs) are increasingly used for code generation and the automation of software development, yet most evaluations focus on high-level programming languages such as Python. This study extends the work \citetitle{llmgen2025} by~\citeauthor{llmgen2025}~\cite{llmgen2025} by examining whether state-of-the-art LLMs are capable of generating efficient \textit{Java} implementations of graph algorithms when provided only with the \textit{C} language source files as context. Our benchmark comprises three LLMs (Anthropic Claude Opus 4.6, Google Gemini 3.1 Pro, and OpenAI GPT-5.3-Codex) and their code generation is evaluated on two different approaches similar to the previous work. The first optimization approach queries the LLMs to generate the most efficient routine for the problem of finding the number of triangles in a graph, while been give a series of human-written C implementations that solve this problem. The second algorithm-synthesis approach.
 
 
 that examined whether state-of-the-art LLMs are capable of generating efficient C implementations of graph-analysis routines. 
@@ -84,19 +84,19 @@ The remainder of this report is organized as follows. Section~\ref{sec:testing} 
 All experiments were conducted on an Apple MacBook Pro with an Apple M3 chip featuring 4 performance cores running at up to 4.05 GHz and 4 efficiency cores running at up to 2.75 GHz, with 16 GB of unified DRAM. The performance cores feature 192 KB of L1 instruction cache, 128 KB of L1 data cache, and a shared 16 MB L2 cache. The efficiency cores feature 128 KB of L1 instruction cache, 64 KB of L1 data cache, and a shared 4 MB L2 cache. The cache line size is 128 bytes. Java implementations were compiled and executed using Java 21 (Hotspot JVM, build 21.0.10). Each algorithm is averaged over 10 runs to smooth out measurement noise, consistent with the methodology of the original paper~\cite{llmgen2025}. Note that absolute runtime results are not comparable with the original study which used an AMD EPYC 7753 server at 2.45 GHz with 512 GB of RAM~\cite{llmgen2025}. 
 
 
+\subsection{Employed Large Language Models}
 
+At the time of writing, three frontier large language models from the three most dominant AI providers were selected, each recognized for their strong reasoning and code generation capabilities. We chose Claude Opus 4.6, in comparison to the authors choice of Claude Sonnet 4. This version is Anthropic's flagship AI model, that lays its focus on superior coding, complex reasoning, and agentic workflow integration. Its context window is 1 million token long 
 
-\subsection{LLMs Used}
+\textbf{Anthropic Claude Opus 4.6:} Anthropic's Claude models are renowned for their advanced reasoning, language comprehension, and efficient code generation~\cite{llmgen2025}. We selected Claude Opus 4.6, released on February 5, 2026, which is currently Anthropic's most capable model. Compared to Claude Sonnet 4 which was used in the original paper, Opus 4.6 is specifically designed for superior coding, complex reasoning, and agentic workflow integration. Featuring a context window of up to 1 million tokens, it achieves state-of-the-art performance on coding benchmarks such as Terminal-Bench 2.0~\cite{anthropic2026opus46}. We therefore expect it to produce more sophisticated and efficient algorithm implementations than its Sonnet predecessor. 
 
-We evaluated the following three LLMs:
+\textbf{Google Gemini 3.1 Pro:} In recent years, Google has gained significant attention through the release of several highly capable multimodal models, thereby positioning Gemini as a leading model family for text, images, and code~\cite{google2026gemini31pro}. In the original paper, the Gemini 2.5 Flash model was not able to keep up with the more advanced models from Anthropic and OpenAI, though Gemini 2.5 Pro remained competitive and achieved respectable efficiency rates and runtimes. The release of Gemini 3.1 Pro on February 19, 2026, represented a substantial improvement over its predecessors, achieving more than double the reasoning performance on competitive coding benchmarks~\cite{google2026gemini31pro}, making it a compelling candidate for our cross-language benchmark.
 
-\textbf{[LLM 1, e.g., OpenAI ChatGPT o4-mini-high]:} [1--2 sentences describing it and why you chose it.]
+\textbf{OpenAI GPT-5.3-Codex:} With the release of ChatGPT in 2022, OpenAI is widely regarded as one of the pioneers of the modern era of generative AI that has fundamentally changed the public perception of the capabilities of large language models~\cite{llmgen2025}. Its Codex line specifically refers to a family of models built for code generation and software engineering tasks. The GPT-5.3-Codex model was released on February 5, 2026, and advances coding performance and reasoning capabilities, showing strong performance on modern benchmarks. For our experiments, the model was accessed via the GitHub Copilot web interface.
 
-\textbf{[LLM 2, e.g., Anthropic Claude Sonnet 4]:} [1--2 sentences describing it and why you chose it.]
+\subsection{Prompt Design}
 
-\textbf{[LLM 3, e.g., Google Gemini 2.5 Pro]:} [1--2 sentences describing it and why you chose it.]
-
-Each LLM was cold-started before each prompt, consistent with the methodology of Barati Nia et al.\ \cite{llmgen2025}. The prompts used in our experiments are shown below.
+The LLM prompts 
 
 \textbf{Optimization Approach (adapted from \cite{llmgen2025}, Fig.\ 1):}
 
@@ -123,11 +123,6 @@ Attached Files: (bfs.c, graph.c, main.c, queue.c)
 Where \texttt{\{ALGORITHM\}} is replaced by ''number of triangles'', ''diameter'', and ''clique number''.
 
 \subsection{Optimization Approach Results}
-
-% Fill in after running experiments.
-% Record: compilable (yes/no), correct (yes/no),
-% # triangles on RMAT-18 (should be 101,930,789),
-% runtime on RMAT-18 (seconds), and techniques used.
 
 Table~\ref{tab:optimization} summarizes the results of the optimization approach on RMAT-18.
 
@@ -244,7 +239,7 @@ Future extensions of this work could include: (1) testing additional LLMs or mor
 %---------------------------------------------------------------
 % ACKNOWLEDGEMENTS
 %---------------------------------------------------------------
-\section*{Acknowledgements}
+\section{Acknowledgements}
 
 % YOU MUST fill this in --- required by the honour code.
 % List every AI tool used and exactly what for.
@@ -254,6 +249,9 @@ The author used Claude (Anthropic) to assist with the translation of C infrastru
 %---------------------------------------------------------------
 % REFERENCES
 %---------------------------------------------------------------
+
+\newpage
+
 \printbibliography
 
 \end{document}
