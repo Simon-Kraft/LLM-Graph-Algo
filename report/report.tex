@@ -96,49 +96,60 @@ At the time of writing, three frontier large language models from the three most
 
 \subsection{Prompt Design}
 
-The LLM prompts 
+In order to achieve the cross-language setting, we adapted the prompts from \citeauthor{llmgen2025}~\cite{llmgen2025} with two major modifications. First, the target language is changed from C to Java, with the function signature adapted accordingly. Second, the sentence ''\texttt{Suppose this whole framework is already translated to Java}'' is added to inform the models that a Java infrastructure exists, without actually providing it. These alterations force the models to infer the Java API and implementations from the provided C source code alone. Consistent with the methodology of the original paper, each LLM is cold-started before each prompt~\cite{llmgen2025}.
 
-\textbf{Optimization Approach (adapted from \cite{llmgen2025}, Fig.\ 1):}
-
+\begin{figure}[H]
+\noindent \textbf{Optimization Approach}
 \begin{lstlisting}
 The attached C code implements triangle counting in a graph given in CSR format. Suppose this whole framework is already translated to Java. Write a Java method tc_fast() with the API below that is the fastest sequential triangle counting code you can generate:
 
-public static long tc_fast(Graph graph)
+  public static long tc_fast(Graph graph)
 
 Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
 \end{lstlisting}
+\vspace{-0.5em}
+\caption{Prompt structure for the optimization approach, adapted from~\cite{llmgen2025} Fig.~1.}
+\end{figure}
 
-\vspace{2em}
-
-\textbf{Algorithm-Synthesis Approach (adapted from \cite{llmgen2025}, Fig.\ 2):}
-
+\begin{figure}[H]
+\noindent \textbf{Algorithm-Synthesis Approach}
 \begin{lstlisting}
-The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential implementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
+The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential mplementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
 
-public static long fast(Graph graph)
+  public static long fast(Graph graph)
 
 Attached Files: (bfs.c, graph.c, main.c, queue.c)
 \end{lstlisting}
+\vspace{-0.5em}
+\caption{Prompt structure for the algorithm-synthesis approach, adapted from~\cite{llmgen2025} Fig.~2. \texttt{\{ALGORITHM\}} is replaced by ``number of triangles'', ``diameter'', and ``clique number''.}
+\end{figure}
 
-Where \texttt{\{ALGORITHM\}} is replaced by ''number of triangles'', ''diameter'', and ''clique number''.
+\FloatBarrier
 
-\subsection{Optimization Approach Results}
+\subsection{Results Optimization Approach}
 
-Table~\ref{tab:optimization} summarizes the results of the optimization approach on RMAT-18.
+Table~\ref{tab:optimization} summarizes the results of the optimization approach on RMAT-14.
 
-\begin{table}[h]
+
+\begin{table}[H]
 \centering
-\caption{Comparative Overview --- Optimization Approach (RMAT-18)}
+\caption[short]{\centering Comparative Overview of the LLMs --- Optimization Approach. 
+
+Compilable: compiled without modifications. Correct: produced the correct triangle count. Runtime and memory measured on RMAT-14. Sort: sorted vertices by degree. Hash: used hash tables for intersection. FTC: used the Forward triangle Counting algorithm. BFS: employed Breadth-First Search.}
+
 \label{tab:optimization}
-\begin{tabular}{lcccccc}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccrrccccc}
 \toprule
-Model & Compilable & Correct & \# Triangles & Runtime (s) & Sort & Hash \\
+Model & Compilable & Correct & \# Triangles & Runtime (s) & Mem (MB) & Sort & Hash & FTC & BFS \\
 \midrule
-{[LLM 1]} & & & & & & \\
-{[LLM 2]} & & & & & & \\
-{[LLM 3]} & & & & & & \\
+Baseline (brute-force) & \cmark & \cmark & 4{,}323{,}098 & 2.585 & 0.00 & & & & \\
+Claude Opus 4.6  & \cmark & \cmark & 4{,}323{,}098 & 0.037 & 4.45  & & \cmark & \cmark & \\
+Gemini 3.1 Pro   & \cmark & \cmark & 4{,}323{,}098 & 0.189 & 0.00  & & & \cmark & \\
+GPT-5.3-Codex    & \cmark & \cmark & 4{,}323{,}098 & 0.037 & 52.44 & \cmark & \cmark & & \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 % Compare with the paper's Table III.

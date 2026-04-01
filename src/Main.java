@@ -22,6 +22,8 @@ public class Main {
     private static final int DIAM_REF_SCALE   = 14;
     private static final int CLIQUE_REF_SCALE = 8; // restricted graph scale for clique to 9 becomes otherwise runtime gets very large
 
+    
+    static boolean task1Only = false;
     static boolean QUIET        = false;
     static boolean runAllScales = false;
 
@@ -181,6 +183,7 @@ public class Main {
         System.out.println("Optional:");
         System.out.println(" -o <file>  [Save output to file]");
         System.out.println(" -q         [Quiet mode]");
+        System.out.println(" -1         [Run Task 1 (optimization) only --- for large scales]");
         System.exit(8);
     }
 
@@ -212,6 +215,8 @@ public class Main {
                     runAllScales = true; inputSelected = true; i++; break;
                 case 'q':
                     QUIET = true; i++; break;
+                case '1':
+                    task1Only = true; i++; break;
                 default:
                     System.err.println("Unknown argument: " + args[i]); usage();
             }
@@ -290,7 +295,8 @@ public class Main {
 
     private static void runExperiments(int scale) {
         currentScaleResults.clear();
-
+        
+        
         Graph originalGraph = Graph.createRMAT(scale, EDGE_FACTOR);
         Graph graph         = Graph.allocateRMAT(scale, EDGE_FACTOR);
 
@@ -312,6 +318,8 @@ public class Main {
         benchmark(TCOptClaude::tc_fast,   originalGraph, graph, "TC_OPT", "opt_claude",   baselineTCOpt, scale);
         benchmark(TCOptGemini::tc_fast,   originalGraph, graph, "TC_OPT", "opt_gemini",   baselineTCOpt, scale);
         benchmark(TCOptGPTCodex::tc_fast, originalGraph, graph, "TC_OPT", "opt_gptcodex", baselineTCOpt, scale);
+
+        if (task1Only) return; // skip everything below
 
         // ============================================================
         // TASK 2A: ALGORITHM-SYNTHESIS — Triangle Counting
