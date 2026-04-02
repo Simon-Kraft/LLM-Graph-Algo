@@ -44,34 +44,21 @@ Large language models (LLMs) are increasingly used to automate software developm
 \end{abstract}
 
 \newpage
-\tableofcontents
-\newpage
+% \tableofcontents
+% \newpage
 
 %---------------------------------------------------------------
 % 1. INTRODUCTION
 %---------------------------------------------------------------
 \section{Introduction}
 
-\subsection{Motivation}
+Large language models (LLMs) have seen broad adoption across nearly every sector, assisting with tasks ranging from natural language understanding to complex reasoning and software development~\cite{chang2024survey}. One of their most impactful applications is code generation, where they help programmers by automating development tasks and reducing human error~\cite{llmgen2025}. While most existing benchmarks such as HumanEval~\cite{chen2021evaluatinglargelanguagemodels} and MBPP~\cite{austin2021programsynthesislargelanguage} focus primarily on correctness and functionality, the performance of written code in terms of memory footprint and runtime efficiency is largely overlooked. However, in scientific computing and graph analysis small algorithmic can result in a reduction of runtime and energy consumption by orders of magnitude~\cite{llmgen2025}. Barati Nia, Dindoost, and Bader~\cite{llmgen2025} addressed this by benchmarking eight LLMs on their ability to generate efficient C implementations of graph algorithms, supplying each model with an existing C benchmark suite~\cite{bader2023tc} to reduce the risk of memorized training data reproduction.
 
-Large language models (LLMs) have seen broad adoption across nearly every sector, assisting with tasks ranging from natural language understanding to complex reasoning and software development~\cite{chang2024survey}. One of their most impactful applications is code generation, where they help programmers by automating development tasks and reducing human error~\cite{llmgen2025}. While most existing benchmarks such as HumanEval~\cite{chen2021evaluatinglargelanguagemodels} and MBPP~\cite{austin2021programsynthesislargelanguage} focus primarily on correctness and functionality, the performance of written code in terms of memory footprint and runtime efficiency is largely overlooked. However, in scientific computing and graph analysis small algorithmic can result in a reduction of runtime and energy consumption by orders of magnitude~\cite{llmgen2025}.
+A natural extension is to evaluate LLMs when the target language differs from the provided context --- a scenario of practical relevance as many legacy systems are written in lower-level languages such as C or COBOL~\cite{cobol2000}, while new development targets higher-level languages such as Java. This cross-language setting is strictly harder than same-language generation: since no Java infrastructure is provided, each model must infer the Java API from the C source files alone and generate code that integrates into an imagined Java framework.
 
-\citeauthor{llmgen2025}~\cite{llmgen2025} addressed this gap by benchmarking eight state-of-the art LLMs on their ability to generate efficient C implementations of algorithms for graph analysis. To reduce the risk of models simply reproducing memorized training data, each LLM is supplied with the C source files of an existing benchmark suite~\cite{bader2023tc} and require the generate code to integrate into it. Their results shows that contemporary LLMs can produce generative implementations, often surpassing human-written baselines~\cite{llmgen2025}.
+This work extends the evaluation of Barati Nia et al.~\cite{llmgen2025} under this cross-language setting. Three state-of-the-art LLMs are prompted to generate Java implementations of graph algorithms while only C source files are provided as context. Two approaches are evaluated: an optimization approach for triangle counting, and an algorithm-synthesis approach covering triangle counting, diameter finding, and clique number, using RMAT benchmark graphs~\cite{rmat2004} in CSR format. Each implementation is evaluated on compilability, correctness, runtime, and memory usage, following the methodology of the original paper.
 
-
-\subsection{Cross-Language Code Generation}
-
-A natural extension of their work is to evaluate LLMs when the target language differs from the language of the provided context~\cite{llmgen2025}. This scenario of cross-language code generation is practically relevant, as many legacy systems are running on lower-level languages such as C or COBAL, while recent software development targets higher-level languages such as Java or Python~\cite{cobol2000}. In this setup, the LLM must have a thorough understanding of the underlying algorithms and data structures in order to produce a valid implementation independently, without relying on the provided context language.
-
-\subsection{Contribution}
-
-This work extends the evaluation of \citeauthor{llmgen2025} under the cross-language setting described in the previous section. Three state-of-the-art LLMs are prompted to generate Java implementations of graph algorithms while only C code is provided as context. It is important to note that no Java infrastructure is supplied. Each model must imagine how the C benchmark suite would look when translated to Java and generate code that integrates into this framework. This makes the evaluation strictly harder than same-language generation.
-
-Similar to~\cite{llmgen2025}, two distinct approaches are evaluated. First, an optimization approach for triangle counting that evaluates the performance of LLMs to outperform existing benchmarks. Second, an algorithm synthesis approach covering triangle counting, diameter finding, and clique number. Both approaches are evaluated using RMAT benchmark graphs~\cite{rmat2004} at scales 6 to 14. Each implementation is evaluated on compilability, correctness, execution time, and memory usage, following the methodology of the original paper. 
-
-\subsection{Report Structure}
-
-The remainder of this report is organized as follows. Section~\ref{sec:testing} describes the experimental setup, the evaluated LLMs, the used prompts. Additionally, the obtained numerical results are reported and compared with the results from the original paper~\cite{llmgen2025}. Section~\ref{sec:conclusions} summarizes our findings, discusses the implications of cross-language code generation, and suggests directions for future work.
+The remainder of this report is organized as follows. Section~\ref{sec:testing} describes the experimental setup and reports numerical results compared against the original paper~\cite{llmgen2025}. Section~\ref{sec:conclusions} summarizes findings and suggests future directions.
 
 %---------------------------------------------------------------
 % 2. NUMERICAL TESTING
@@ -81,145 +68,87 @@ The remainder of this report is organized as follows. Section~\ref{sec:testing} 
 
 \subsection{Testing Environment}
 
-All experiments were conducted on an Apple MacBook Pro with an Apple M3 chip featuring 4 performance cores running at up to 4.05 GHz and 4 efficiency cores running at up to 2.75 GHz, with 16 GB of unified DRAM. The performance cores feature 192 KB of L1 instruction cache, 128 KB of L1 data cache, and a shared 16 MB L2 cache. The efficiency cores feature 128 KB of L1 instruction cache, 64 KB of L1 data cache, and a shared 4 MB L2 cache. The cache line size is 128 bytes. Java implementations were compiled and executed using Java 21 (Hotspot JVM, build 21.0.10). Each algorithm is averaged over 10 runs to smooth out measurement noise, consistent with the methodology of the original paper~\cite{llmgen2025}. Note that absolute runtime results are not comparable with the original study which used an AMD EPYC 7753 server at 2.45 GHz with 512 GB of RAM~\cite{llmgen2025}. 
-
+All experiments were conducted on an Apple MacBook Pro with an Apple M3 chip featuring 4 performance cores running at up to 4.05 GHz and 4 efficiency cores running at up to 2.75 GHz, with 16 GB of unified DRAM. The performance cores feature 192 KB of L1 instruction cache, 128 KB of L1 data cache, and a shared 16 MB L2 cache. The efficiency cores feature 128 KB of L1 instruction cache, 64 KB of L1 data cache, and a shared 4 MB L2 cache. Java implementations were compiled and executed using Java 21. Each algorithm is averaged over 10 runs to smooth out measurement noise, consistent with the methodology of the original paper~\cite{llmgen2025}. Note that absolute runtime results are not comparable with the original study which used an AMD EPYC 7753 server at 2.45 GHz with 512 GB of RAM~\cite{llmgen2025}. 
 
 \subsection{Employed Large Language Models}
 
-At the time of writing, three frontier large language models from the three most dominant AI providers were selected, each recognized for their strong reasoning and code generation capabilities. We chose Claude Opus 4.6, in comparison to the authors choice of Claude Sonnet 4. This version is Anthropic's flagship AI model, that lays its focus on superior coding, complex reasoning, and agentic workflow integration. Its context window is 1 million token long 
+At the time of writing, three frontier large language models from the three most dominant AI providers were selected, each recognized for their strong reasoning and code generation capabilities.
 
-\textbf{Anthropic Claude Opus 4.6:} Anthropic's Claude models are renowned for their advanced reasoning, language comprehension, and efficient code generation~\cite{llmgen2025}. We selected Claude Opus 4.6, released on February 5, 2026, which is currently Anthropic's most capable model. Compared to Claude Sonnet 4 which was used in the original paper, Opus 4.6 is specifically designed for superior coding, complex reasoning, and agentic workflow integration. Featuring a context window of up to 1 million tokens, it achieves state-of-the-art performance on coding benchmarks such as Terminal-Bench 2.0~\cite{anthropic2026opus46}. We therefore expect it to produce more sophisticated and efficient algorithm implementations than its Sonnet predecessor. 
+\textbf{Anthropic Claude Opus 4.6} (released February 5, 2026~\cite{anthropic2026opus46}) is Anthropic's most capable model, designed for superior coding, complex reasoning, and agentic workflows with a 1M token context window. Compared to Claude Sonnet 4 used in the original paper, it achieves state-of-the-art results on Terminal-Bench 2.0, leading us to expect stronger implementations.
 
-\textbf{Google Gemini 3.1 Pro:} In recent years, Google has gained significant attention through the release of several highly capable multimodal models, thereby positioning Gemini as a leading model family for text, images, and code~\cite{google2026gemini31pro}. In the original paper, the Gemini 2.5 Flash model was not able to keep up with the more advanced models from Anthropic and OpenAI, though Gemini 2.5 Pro remained competitive and achieved respectable efficiency rates and runtimes. The release of Gemini 3.1 Pro on February 19, 2026, represented a substantial improvement over its predecessors, achieving more than double the reasoning performance on competitive coding benchmarks~\cite{google2026gemini31pro}, making it a compelling candidate for our cross-language benchmark.
+\textbf{Google Gemini 3.1 Pro} (released February 19, 2026~\cite{google2026gemini31pro}) represents a substantial improvement over the Gemini 2.5 models tested in the original paper, achieving more than double the reasoning performance on competitive coding benchmarks, making it a compelling candidate to re-evaluate Google's standing.
 
-\textbf{OpenAI GPT-5.3-Codex:} With the release of ChatGPT in 2022, OpenAI is widely regarded as one of the pioneers of the modern era of generative AI that has fundamentally changed the public perception of the capabilities of large language models~\cite{llmgen2025}. Its Codex line specifically refers to a family of models built for code generation and software engineering tasks. The GPT-5.3-Codex model was released on February 5, 2026, and advances coding performance and reasoning capabilities, showing strong performance on modern benchmarks. For our experiments, the model was accessed via the GitHub Copilot web interface.
+\textbf{OpenAI GPT-5.3-Codex} (released February 5, 2026~\cite{openai2026gpt53codex}), part of OpenAI's dedicated coding model family, advances both frontier coding performance and reasoning capabilities. It was accessed via the GitHub Copilot web interface.
 
 \subsection{Prompt Design}
 
-In order to achieve the cross-language setting, we adapted the prompts from \citeauthor{llmgen2025}~\cite{llmgen2025} with two major modifications. First, the target language is changed from C to Java, with the function signature adapted accordingly. Second, the sentence ''\texttt{Suppose this whole framework is already translated to Java}'' is added to inform the models that a Java infrastructure exists, without actually providing it. These alterations force the models to infer the Java API and implementations from the provided C source code alone. Consistent with the methodology of the original paper, each LLM is cold-started before each prompt~\cite{llmgen2025}.
+The altered prompts are given in Figure~\ref{fig:prompt-1} and Figure~\ref{fig:prompt-2} in the Appendix. In order to achieve the cross-language setting, the prompts are adapted from~\cite{llmgen2025} with two modifications: the target language is changed from C to Java, and the phrase \textit{``Suppose this whole framework is already translated to Java''} is added to inform models that a Java infrastructure exists without providing it, forcing them to infer the Java API from the C source alone. Each LLM was cold-started before each prompt~\cite{llmgen2025}.
 
-\begin{figure}[H]
-\noindent \textbf{Optimization Approach}
-\begin{lstlisting}
-The attached C code implements triangle counting in a graph given in CSR format. Suppose this whole framework is already translated to Java. Write a Java method tc_fast() with the API below that is the fastest sequential triangle counting code you can generate:
+\subsection{Optimization Approach Results}
 
-  public static long tc_fast(Graph graph)
+Table~\ref{tab:optimization} summarizes the results of the optimization approach on RMAT-16.  In contrast to the original paper, where three out of eight models failed to produce correct triangle counts~\cite{llmgen2025}, all three models in our evaluation compiled without any manual modification and produced correct results. This finding suggests that providing the full triangle counting implementation as context is sufficient for reliable cross-language generation.
 
-Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
-\end{lstlisting}
-\vspace{-0.5em}
-\caption{Prompt structure for the optimization approach, adapted from~\cite{llmgen2025} Fig.~1.}
-\end{figure}
+All three implementations substantially outperformed the brute-force baseline (27.07\,s), drawing on techniques present in the provided \texttt{tc.c} source file. GPT-5.3-Codex achieved the fastest runtime (0.298\,s, $\approx91\times$ faster) by employing all three optimizations available in the C context --- degree-based vertex sorting, hash-based intersection, and the Forward Triangle Counting algorithm --- at the cost of 25.73\,MB of peak memory. Claude Opus 4.6 achieved a nearly identical runtime (0.318\,s) using only hash-based intersection and FTC, without sorting. Gemini 3.1 Pro was $3.5\times$ slower at 1.032\,s but required zero additional memory, relying solely on FTC with a merge-path intersection over the already-sorted adjacency lists. This strategy trades runtime for memory efficiency. However,whether each model genuinely reasoned from the C source or reproduced patterns from training data remains an inherent limitation of this evaluation setup~\cite{llmgen2025}.
 
-\begin{figure}[H]
-\noindent \textbf{Algorithm-Synthesis Approach}
-\begin{lstlisting}
-The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential mplementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
-
-  public static long fast(Graph graph)
-
-Attached Files: (bfs.c, graph.c, main.c, queue.c)
-\end{lstlisting}
-\vspace{-0.5em}
-\caption{Prompt structure for the algorithm-synthesis approach, adapted from~\cite{llmgen2025} Fig.~2. \texttt{\{ALGORITHM\}} is replaced by ``number of triangles'', ``diameter'', and ``clique number''.}
-\end{figure}
-
-\FloatBarrier
-
-\subsection{Results Optimization Approach}
-
-Table~\ref{tab:optimization} summarizes the results of the optimization approach on RMAT-14.
-
-
-\begin{table}[H]
-\centering
-\caption[short]{\centering Comparative Overview of the LLMs --- Optimization Approach. 
-
-Compilable: compiled without modifications. Correct: produced the correct triangle count. Runtime and memory measured on RMAT-14. Sort: sorted vertices by degree. Hash: used hash tables for intersection. FTC: used the Forward triangle Counting algorithm. BFS: employed Breadth-First Search.}
-
-\label{tab:optimization}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lccrrccccc}
-\toprule
-Model & Compilable & Correct & \# Triangles & Runtime (s) & Mem (MB) & Sort & Hash & FTC & BFS \\
-\midrule
-Baseline (brute-force) & \cmark & \cmark & 4{,}323{,}098 & 2.585 & 0.00 & & & & \\
-Claude Opus 4.6  & \cmark & \cmark & 4{,}323{,}098 & 0.037 & 4.45  & & \cmark & \cmark & \\
-Gemini 3.1 Pro   & \cmark & \cmark & 4{,}323{,}098 & 0.189 & 0.00  & & & \cmark & \\
-GPT-5.3-Codex    & \cmark & \cmark & 4{,}323{,}098 & 0.037 & 52.44 & \cmark & \cmark & & \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
-
-% Compare with the paper's Table III.
-% Did the LLMs produce correct triangle counts?
-% How did Java runtimes compare to C runtimes?
-
-[FILL IN DISCUSSION OF OPTIMIZATION RESULTS HERE]
+% \textcolor{red}{Maybe use programming language that does not have too many code examples and see how the translation works there}.
 
 \subsection{Algorithm-Synthesis Approach Results}
 
-\subsubsection{Ready-To-Use (RTU) Capability}
+\indent \textit{1) Read-To-Use Capability:} Table~\ref{tab:rtu} reports the Ready-To-Use (RTU) percentage for each model across the three graph algorithm tasks. Similar to \citeauthor{llmgen2025}~\cite{llmgen2025}, the implementation of an algorithm is defined as Ready-To-Use (RTU) if the generated code meets all of the following criteria:
 
-% RTU = compiles without modification + correct output + runs within reasonable time.
-% Your RTU% = (number of RTU algorithms out of 3) * 100
-% e.g. if 2 out of 3 algorithms are RTU: 67%
+\begin{itemize}
+  \item \textbf{Compilability:} The code must compile successfully without any manual modifications.
+  \item \textbf{Correctness:} The code must produces correct outputs on all test cases.
+  \item \textbf{Timeliness:} The implementation must run within an acceptable runtime threshold to ensure practical usability.
+\end{itemize}
 
-Following Barati Nia et al.\ \cite{llmgen2025}, we define a result as Ready-To-Use (RTU) if the generated code: (1) compiles successfully without manual modifications, (2) produces correct output on all test cases, and (3) runs within an acceptable time threshold. Table~\ref{tab:rtu} reports the RTU percentage for each model across the three algorithm tasks.
+\vspace{-1em}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
-\caption{RTU Percentage for Each Model}
+\caption[short]{\centering RTU Percentage per Model.}
+\vspace{0.5em}
 \label{tab:rtu}
 \begin{tabular}{lc}
 \toprule
 Model & RTU Percentage \\
 \midrule
-{[LLM 1]} & \% \\
-{[LLM 2]} & \% \\
-{[LLM 3]} & \% \\
+Anthropic Claude Opus 4.6  & $33\,\%$ \\
+Google Gemini 3.1 Pro      & $\mathbf{100}\,$\textbf{\%} \\
+OpenAI GPT-5.3-Codex       & $0\,\%$  \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-% Compare with Table I of the paper.
-% Are Java RTU rates higher or lower than C? Why?
+\vspace{0.5em}
 
-[FILL IN DISCUSSION OF RTU RESULTS HERE]
+Gemini 3.1 Pro achieved the highest RTU rate of 100\%, successfully generating compilable, correct, and timely implementations for all three algorithms. Claude Opus 4.6 achieved 33\%, with only triangle counting passing all three criteria. Its diameter implementation required a manual compilability fix, and its clique implementation produced incorrect results. GPT-5.3-Codex failed to achieve any RTU implementations, with compilability failures in triangle counting and clique number, and a timeliness failure in diameter finding. % A detailed breakdown of all RTU failures is provided in Appendix~\ref{app:rtu}.
 
-\subsubsection{Efficiency Rates}
+Compared to the original paper, where RTU rates ranged from 17\% to 83\% across eight C implementations, our cross-language setting shows greater variance. Gemini 3.1 Pro surpasses even the best result from the original paper (Claude Sonnet 4 Extended, 83\%), while GPT-5.3-Codex scores 0\%. This suggests that cross-language generation amplifies differences between models rather than uniformly degrading performance.
 
-% For each RTU result compute:
-%   rate = 1 / (t * m)
-% where t = relative runtime (fastest implementation = 1.0)
-%       m = relative peak memory (lowest memory = 1.0)
-% Sum rates across all algorithms for the total score.
-% Non-RTU results contribute 0 to the total.
+\textit{2) Efficiency Trade-Offs:} Table~\ref{tab:efficiency} shows the combined efficiency rates for each model, computed as the sum of $1/(t \cdot m)$ across all RTU algorithm implementations, where $t$ is the relative runtime and $m$ is the relative peak memory usage, similar to~\cite{llmgen2025}.
 
-Table~\ref{tab:efficiency} shows the combined efficiency rates for each model, computed as the sum of $1/(t \cdot m)$ across all RTU algorithm implementations, where $t$ is the relative runtime and $m$ is the relative peak memory usage \cite{llmgen2025}.
+\vspace{-1em}
 
 \begin{table}[h]
 \centering
 \caption{Efficiency Rates}
+\vspace{0.5em}
 \label{tab:efficiency}
 \begin{tabular}{lc}
 \toprule
 Model & Efficiency Rate \\
 \midrule
-{[LLM 1]} & \\
-{[LLM 2]} & \\
-{[LLM 3]} & \\
+Anthropic Claude Opus 4.6 & 0.15 \\
+Google Gemini 3.1 Pro & $\mathbf{2.63}$ \\
+OpenAI GPT-5.3-Codex & 0.0000 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-% Compare with Table II of the paper.
-% Which model performed best and why?
+The efficiency rates reflect the RTU results directly. Gemini 3.1 Pro achieves the highest total efficiency rate of 2.63, contributing rates across all three algorithms. Claude Opus 4.6 contributes only through its RTU triangle counting implementation, yielding a rate of 0.15, while GPT-5.3-Codex contributes nothing. Compared to the original paper's best result of 3.11 (Claude Sonnet 4 Extended), Gemini 3.1 Pro's 2.63 is competitive, suggesting that the newer Gemini model has significantly closed the gap with Anthropic's models observed in the original study. However, the low rates of the other models reflect a key limitation of the cross-language setting, where compilability failures caused by incorrect API assumptions disproportionately penalize the LLMs. Furthermore, with only three algorithms evaluated, a single failure has an outsized effect on the total score. Evaluating a broader algorithm suite would likely produce more differentiated and balanced results.
 
-[FILL IN DISCUSSION OF EFFICIENCY RESULTS HERE]
-
-\subsection{Discussion}
+% \subsection{Discussion}
 
 % This is where you earn the insight points (worth a lot!).
 % Address these questions:
@@ -229,7 +158,7 @@ Model & Efficiency Rate \\
 % 4. What challenges arise from cross-language generation?
 % 5. Any surprising results worth highlighting?
 
-[FILL IN YOUR ANALYSIS AND INSIGHTS HERE]
+% [FILL IN YOUR ANALYSIS AND INSIGHTS HERE]
 
 %---------------------------------------------------------------
 % 3. SUMMARY AND CONCLUSIONS
@@ -264,5 +193,72 @@ The author used Claude (Anthropic) to assist with the translation of C infrastru
 \newpage
 
 \printbibliography
+
+\newpage
+
+\cleardoublepage
+\phantomsection
+\section*{Appendix}\label{sec:appendix} % This removes the "A" from the page heading
+\markboth{Appendix}{Appendix} % Optional: Updates page headers if you use them
+
+\begin{figure}[H]
+\noindent \textbf{Optimization Approach}
+\begin{lstlisting}
+The attached C code implements triangle counting in a graph given in CSR format. Suppose this whole framework is already translated to Java. Write a Java method tc_fast() with the API below that is the fastest sequential triangle counting code you can generate:
+
+  public static long tc_fast(Graph graph)
+
+Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
+\end{lstlisting}
+\vspace{-0.5em}
+\caption{Prompt structure for the optimization approach, adapted from~\cite{llmgen2025} Fig.~1.}
+\label{fig:prompt-1}
+\end{figure}
+
+\begin{figure}[H]
+\noindent \textbf{Algorithm-Synthesis Approach}
+\begin{lstlisting}
+The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential mplementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
+
+  public static long fast(Graph graph)
+
+Attached Files: (bfs.c, graph.c, main.c, queue.c)
+\end{lstlisting}
+\vspace{-0.5em}
+\caption{Prompt structure for the algorithm-synthesis approach, adapted from~\cite{llmgen2025} Fig.~2. \texttt{\{ALGORITHM\}} is replaced by ''number of triangles'', ''diameter'', and ''clique number''.}
+\label{fig:prompt-2}
+\end{figure}
+
+\FloatBarrier
+
+
+\begin{table}[H]
+\centering
+\caption[short]{\centering Comparative Overview of the LLMs --- Optimization Approach. 
+
+Compilable: compiled without modifications. Correct: produced the correct triangle count. Runtime and Memory measured on RMAT-16\footnotemark. Sort: sorted vertices by degree at beginning. Hash: used hash tables for intersection operations. FTC: used the forward triangle counting algorithm. BFS: employed breadth-first search.}
+
+\vspace{0.5em}
+
+\label{tab:optimization}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccrrccccc}
+\toprule
+Model & Compilable & Correct & \# Triangles & Runtime (s) & Mem (MB) & Sort & Hash & FTC & BFS \\
+\midrule
+Baseline (brute-force) & \cmark & \cmark & 21{,}236{,}020 & 27.0682 & 0.12 & \xmark & \xmark & \xmark & \xmark \\
+Claude Opus 4.6  & \cmark & \cmark & 21{,}236{,}020 & 0.3182 & 11.00 & \xmark & \cmark & \cmark & \xmark \\
+Gemini 3.1 Pro   & \cmark & \cmark & 21{,}236{,}020 & 1.0315 & $\mathbf{0.00}$ & \xmark & \xmark & \cmark & \xmark \\
+GPT-5.3-Codex    & \cmark & \cmark & 21{,}236{,}020 & $\mathbf{0.2979}$ & 25.73 & \cmark & \cmark & \cmark & \xmark \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\footnotetext{Unlike the original paper, which reports relative memory 
+usage normalized to ChatGPT o3, we report absolute peak memory 
+consumption in MB measured via JVM heap delta, as no equivalent 
+baseline model exists in our setup.}
+
 
 \end{document}

@@ -21,11 +21,10 @@ Any modification disqualifies an implementation from RTU status.
 | Model | Algorithm | File | Modification Required |
 |-------|-----------|-----------|----------------------|
 | GPT-5.3-Codex | Triangle Counting | [TCGPTCodex.java](src/task2/TCGPTCodex.java) | Used getter methods to access CSR fields (`getRowPtr()`, `getColInd()`) that do not exist. Changed fields manually to direct access (`graph.rowPtr`, `graph.colInd`). |
-| Gemini 3.1 Pro | Triangle Counting | [TCGemini.java](src/task2/TCGemini.java) | Used variable names (`graph.rowPtrs`, `graph.colIdxs`) that do not exist in the `Graph` class. Manually corrected to match actual field names (`graph.rowPtr`, `graph.colInd`). |
 | Claude Opus 4.6 | Diameter | [DiameterClaude.java](src/task2/DiameterClaude.java) | Used implicit `int`-to-`long` conversion in return statement that produced a compile error. Manually added explicit cast for type conversion. |
 | GPT-5.3-Codex | Clique Number | [CliqueGPTCodex.java](src/task2/CliqueGPTCodex.java) | Again used non-existent getter methods. However, this time explaining the assumed Java graph implementation. Again, manually changed to direct field access. |
 
-**Note:** All four implementations required manual modification and are therefore not RTU.
+**Note:** All three implementations required manual modification and are therefore not RTU.
 
 ---
 
@@ -106,7 +105,7 @@ Combining compilability and correctness:
 | Model | Triangle Counting | Diameter | Clique Number |
 |-------|------------------|----------|---------------|
 | Claude Opus 4.6 | ✅ | ❌ (compilability) | ❌ (correctness) |
-| Gemini 3.1 Pro | ❌ (compilability) | ✅ | ✅ |
+| Gemini 3.1 Pro | ✅ | ✅ | ✅ |
 | GPT-5.3-Codex | ❌ (compilability) | ❌ (timeliness) | ❌ (compilability + correctness) |
 
 ---
@@ -122,8 +121,8 @@ With 3 algorithms tested (Triangle Counting, Diameter, Clique Number):
 - RTU% = 1/3 × 100 = **33%**
 
 ### Gemini 3.1 Pro
-- RTU algorithms: **2** (Triangle Counting ❌, Diameter ✅, Clique ✅)
-- RTU% = 2/3 × 100 = **67%**
+- RTU algorithms: **3** (Triangle Counting ✅, Diameter ✅, Clique ✅)
+- RTU% = 3/3 × 100 = **100%**
 
 ### GPT-5.3-Codex
 - RTU algorithms: **0** (Triangle Counting ❌, Diameter ❌, Clique ❌)
@@ -134,7 +133,7 @@ With 3 algorithms tested (Triangle Counting, Diameter, Clique Number):
 | Model | RTU Algorithms | Total Algorithms | RTU Percentage |
 |-------|---------------|-----------------|----------------|
 | Anthropic Claude Opus 4.6 | 1 | 3 | **33%** |
-| Google Gemini 3.1 Pro | 2 | 3 | **67%** |
+| Google Gemini 3.1 Pro | 3 | 3 | **100%** |
 | OpenAI GPT-5.3-Codex | 0 | 3 | **0%** |
 
 ---

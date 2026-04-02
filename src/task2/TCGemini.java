@@ -3,57 +3,65 @@ package task2;
 import graph.Graph;
 
 public class TCGemini {
+
+    /**
+     * Finds the number of triangles in a graph using an O(V) marker array.
+     * Assumes the graph is undirected and its adjacency lists (colInd) are sorted in ascending order.
+     * * @param graph The input graph in CSR format.
+     * @return The total number of triangles.
+     */
     public static long fast(Graph graph) {
-        long triangleCount = 0;
+        long triangles = 0;
+        int[] rowPtr = graph.rowPtr;
+        int[] colInd = graph.colInd;
+        int numVertices = graph.numVertices;
+
+        // Uses O(V) memory. It acts as a fast lookup table.
+        int[] mark = new int[numVertices];
         
-        // Assuming standard CSR field names translated from the C struct.
-        // Adjust 'numVertices', 'rowPtrs', and 'colIdxs' to match your exact Java Graph API.
-        int numVertices = graph.numVertices; 
-        int[] rowPtrs = graph.rowPtr;       // Also commonly called row_offsets
-        int[] colIdxs = graph.colInd;       // Also commonly called edges or column_indices
+        // Initialize with -1 (an invalid vertex ID)
+        for (int i = 0; i < numVertices; i++) {
+            mark[i] = -1; 
+        }
 
         for (int u = 0; u < numVertices; u++) {
-            int uStart = rowPtrs[u];
-            int uEnd = rowPtrs[u + 1];
+            int startU = rowPtr[u];
+            int endU = rowPtr[u + 1];
 
-            // Iterate over all neighbors v of vertex u
-            for (int e_u = uStart; e_u < uEnd; e_u++) {
-                int v = colIdxs[e_u];
+            // 1. Mark all neighbors of 'u' with 'u' itself.
+            // By marking with 'u' instead of 'true', we NEVER have to reset or clear 
+            // the array between iterations, saving O(V) operations per vertex!
+            for (int i = startU; i < endU; i++) {
+                int w = colInd[i];
+                mark[w] = u; 
+            }
+
+            // 2. Iterate over all neighbors 'v' of 'u'
+            for (int i = startU; i < endU; i++) {
+                int v = colInd[i];
                 
-                // To ensure we only count each triangle exactly once and skip redundant 
-                // checks, we enforce an artificial directed DAG order: u < v < w.
-                // We only process edge (u, v) if u < v.
-                if (v <= u) {
-                    continue;
-                }
+                // Enforce u < v to avoid double counting
+                if (v <= u) continue;
 
-                // Because adjacency lists are sorted, all neighbors of u after index 'e_u' 
-                // are strictly greater than v. We start our pointer for u here.
-                int ptrU = e_u + 1;
-                
-                int ptrV = rowPtrs[v];
-                int vEnd = rowPtrs[v + 1];
+                int startV = rowPtr[v];
+                int endV = rowPtr[v + 1];
 
-                // Two-pointer intersection to find common neighbors w
-                while (ptrU < uEnd && ptrV < vEnd) {
-                    int w_u = colIdxs[ptrU];
-                    int w_v = colIdxs[ptrV];
-
-                    if (w_u == w_v) {
-                        // We found a common neighbor w! 
-                        // Because ptrU started after v, we implicitly know w > v.
-                        triangleCount++;
-                        ptrU++;
-                        ptrV++;
-                    } else if (w_u < w_v) {
-                        ptrU++;
-                    } else {
-                        ptrV++;
+                // 3. For each neighbor 'w' of 'v', check if it is also a neighbor of 'u'
+                for (int j = startV; j < endV; j++) {
+                    int w = colInd[j];
+                    
+                    // Enforce v < w so we only count triangles where u < v < w
+                    if (w <= v) continue;
+                    
+                    // O(1) Instant Lookup Check!
+                    // If mark[w] == u, then 'w' is connected to both 'u' and 'v'
+                    if (mark[w] == u) {
+                        triangles++;
                     }
                 }
             }
         }
         
-        return triangleCount;
+        return triangles;
     }
 }

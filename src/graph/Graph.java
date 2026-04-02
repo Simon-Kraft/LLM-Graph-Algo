@@ -39,7 +39,7 @@ public class Graph {
 
     public static Graph createRMAT(int scale, int edgeFactor) {
         Graph graph = allocateRMAT(scale, edgeFactor);
-        Random rand = new Random(42);
+        Random rand = new Random(41);
 
         int[][] edges = new int[graph.numEdges][2]; // [i][0]=src, [i][1]=dst
 

@@ -32,6 +32,18 @@ public class Main {
     private static PrintStream outfile       = System.out;
     private static String csvPath            = null;
 
+    // Implementations that failed RTU criteria and must not contribute to efficiency rates.
+    // Compilability failures: required manual code modifications before running.
+    // Timeliness failures: runtime exceeded acceptable threshold at reference scale.
+    // Correctness failures: already handled by !r.correct check, listed here for clarity.
+    private static final Set<String> NON_RTU = new HashSet<>(Arrays.asList(
+        "syn_tc_gptcodex",    // ❌ compilability (used non-existent getter methods)
+        "syn_diam_claude",    // ❌ compilability (implicit int-to-long conversion error)
+        "syn_diam_gptcodex",  // ❌ timeliness   (16.3s at RMAT-14, too slow)
+        "syn_clique_claude",  // ❌ correctness  (also caught by !r.correct)
+        "syn_clique_gptcodex" // ❌ compilability + correctness
+    ));
+
     // ================================================================
     // Result storage
     // ================================================================
@@ -108,7 +120,7 @@ public class Main {
             double minTime = Double.MAX_VALUE;
             double minMem  = Double.MAX_VALUE;
             for (BenchmarkResult r : refResults) {
-                if (r.correct) {
+                if (r.correct && !NON_RTU.contains(r.name)) {
                     if (r.timeSec > 0 && r.timeSec < minTime) minTime = r.timeSec;
                     if (r.memMB   > 0 && r.memMB   < minMem)  minMem  = r.memMB;
                 }
@@ -118,7 +130,7 @@ public class Main {
 
             for (BenchmarkResult r : refResults) {
                 String modelName = extractModelName(r.name);
-                if (!r.correct) {
+                if (!r.correct || NON_RTU.contains(r.name)) {
                     outfile.printf("%-12s\t%-20s\t%10s\t%10s\t%10s%n",
                             type, modelName, "-", "-", "0 (not RTU)");
                     totalRates.merge(modelName, 0.0, Double::sum);
@@ -418,7 +430,7 @@ public class Main {
                 double minTime = Double.MAX_VALUE;
                 double minMem  = Double.MAX_VALUE;
                 for (BenchmarkResult r : refResults) {
-                    if (r.correct) {
+                    if (r.correct && !NON_RTU.contains(r.name)) {
                         if (r.timeSec > 0 && r.timeSec < minTime) minTime = r.timeSec;
                         if (r.memMB   > 0 && r.memMB   < minMem)  minMem  = r.memMB;
                     }
@@ -429,7 +441,7 @@ public class Main {
                 for (BenchmarkResult r : refResults) {
                     String modelName = extractModelName(r.name);
                     String alg       = extractAlgorithm(r.name, r.type);
-                    if (!r.correct) {
+                    if (!r.correct || NON_RTU.contains(r.name)) {
                         csv.printf("%s,%s,%d,-,-,0,false%n", modelName, alg, scale);
                     } else {
                         double t    = r.timeSec / minTime;
@@ -493,8 +505,8 @@ public class Main {
     // Helper: extract algorithm name from benchmark name and type
     private static String extractAlgorithm(String name, String type) {
         if (type.equals("TC_OPT") || type.equals("TC_SYN")) return "Triangle Counting";
-        if (type.equals("DIAM"))   return "Diameter";
-        if (type.equals("CLIQUE")) return "Clique Number";
+        if (type.equals("DIAM_SYN"))   return "Diameter";      // ← was "DIAM"
+        if (type.equals("CLIQUE_SYN")) return "Clique Number"; // ← was "CLIQUE"
         return type;
     }
 
