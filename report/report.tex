@@ -29,16 +29,7 @@
 %---------------------------------------------------------------
 \begin{abstract}
 
-Large language models (LLMs) are increasingly used for code generation and the automation of software development, yet most evaluations focus on high-level programming languages such as Python. This study extends the work \citetitle{llmgen2025} by~\citeauthor{llmgen2025}~\cite{llmgen2025} by examining whether state-of-the-art LLMs are capable of generating efficient \textit{Java} implementations of graph algorithms when provided only with the \textit{C} language source files as context. Our benchmark comprises three LLMs (Anthropic Claude Opus 4.6, Google Gemini 3.1 Pro, and OpenAI GPT-5.3-Codex) and their code generation is evaluated on two different approaches similar to the previous work. The first optimization approach queries the LLMs to generate the most efficient routine for the problem of finding the number of triangles in a graph, while been give a series of human-written C implementations that solve this problem. The second algorithm-synthesis approach.
-
-
-that examined whether state-of-the-art LLMs are capable of generating efficient C implementations of graph-analysis routines. 
-
-
-
-Large language models (LLMs) are increasingly used to automate software development, yet most evaluations focus on high-level languages such as Python. This project extends the study by Barati Nia et al.\ \cite{llmgen2025} by evaluating whether state-of-the-art LLMs can generate efficient \textit{Java} implementations of graph algorithms when provided only with C language source files as context. We benchmark three LLMs --- OpenAI ChatGPT, Anthropic Claude, and Google Gemini --- using two approaches: an optimization approach for triangle counting and an algorithm-synthesis approach covering triangle counting, diameter finding, and clique number. Using the RMAT synthetic graph benchmark suite (scales 6--18), we evaluate each model's generated code on compilability, correctness, and runtime efficiency. Our results show that [FILL IN KEY RESULT 1] and [FILL IN KEY RESULT 2], providing new insights into LLM cross-language code generation capabilities.
-
-\textbf{What is meant by the novel idea of generating Java code (without knowing the Java benchmark suite), just knowing the C benchmark suite? This would also be a justification of just translating the benchmark files with Claude?}
+Large language models (LLMs) are increasingly used for code generation and the automation of software development, yet most evaluations focus on high-level programming languages such as Python. This study extends the work \citetitle{llmgen2025} by~\citeauthor{llmgen2025}~\cite{llmgen2025} by examining whether state-of-the-art LLMs are capable of generating efficient Java implementations of graph algorithms when provided only with the C language source files as context. Our benchmark comprises three LLMs (Anthropic Claude Opus 4.6, Google Gemini 3.1 Pro, and OpenAI GPT-5.3-Codex) and their code generation is evaluated on two different approaches similar to the previous work. The first optimization approach queries the LLMs to generate the most efficient routine for the problem of finding the number of triangles in a graph, while being given a series of human-written C implementations that solve this problem. The second algorithm-synthesis approach requires the LLMs to generate Java implementations for Triangle Counting, Graph Diameter, and Clique Number, where the models are solely provided with the benchmark suite in C and need to make assumptions about an equivalent benchmark suite in Java, without actually seeing it. The implementations are evaluated based on compilability, correctness, runtime efficiency, and memory footprint using synthetic RMAT benchmark graphs. Our results reveal significant differences between the evaluated models in the cross-language setting. While the optimization approach showed broad success across all models, the algorithm-synthesis approach was highly dominated by Google's Gemini 3.1 Pro model with 100\% RTU implementations. Both other models struggled with API consistency and therefore performed poorly on the second approach. These findings highlight the difficulty of structural abstraction in LLM code generation and suggest that current efficiency metrics are highly sensitive to small-sample evaluation suites.
 
 
 \end{abstract}
@@ -52,11 +43,11 @@ Large language models (LLMs) are increasingly used to automate software developm
 %---------------------------------------------------------------
 \section{Introduction}
 
-Large language models (LLMs) have seen broad adoption across nearly every sector, assisting with tasks ranging from natural language understanding to complex reasoning and software development~\cite{chang2024survey}. One of their most impactful applications is code generation, where they help programmers by automating development tasks and reducing human error~\cite{llmgen2025}. While most existing benchmarks such as HumanEval~\cite{chen2021evaluatinglargelanguagemodels} and MBPP~\cite{austin2021programsynthesislargelanguage} focus primarily on correctness and functionality, the performance of written code in terms of memory footprint and runtime efficiency is largely overlooked. However, in scientific computing and graph analysis small algorithmic can result in a reduction of runtime and energy consumption by orders of magnitude~\cite{llmgen2025}. Barati Nia, Dindoost, and Bader~\cite{llmgen2025} addressed this by benchmarking eight LLMs on their ability to generate efficient C implementations of graph algorithms, supplying each model with an existing C benchmark suite~\cite{bader2023tc} to reduce the risk of memorized training data reproduction.
+Large language models (LLMs) have seen broad adoption across nearly every sector, assisting with tasks ranging from natural language understanding to complex reasoning and software development~\cite{chang2024survey}. One of their most impactful applications is code generation, where they help programmers by automating development tasks and reducing human error~\cite{llmgen2025}. While most existing benchmarks such as HumanEval~\cite{chen2021evaluatinglargelanguagemodels} and MBPP~\cite{austin2021programsynthesislargelanguage} focus primarily on correctness and functionality, the performance of written code in terms of memory footprint and runtime efficiency is largely overlooked. However, in scientific computing and graph analysis small algorithmic optimizations can result in a reduction of runtime and energy consumption by orders of magnitude~\cite{llmgen2025}. Barati Nia, Dindoost, and Bader~\cite{llmgen2025} addressed this by benchmarking eight LLMs on their ability to generate efficient C implementations of graph algorithms, supplying each model with an existing C benchmark suite~\cite{bader2023tc} to reduce the risk of memorized training data reproduction.
 
 A natural extension is to evaluate LLMs when the target language differs from the provided context --- a scenario of practical relevance as many legacy systems are written in lower-level languages such as C or COBOL~\cite{cobol2000}, while new development targets higher-level languages such as Java. This cross-language setting is strictly harder than same-language generation: since no Java infrastructure is provided, each model must infer the Java API from the C source files alone and generate code that integrates into an imagined Java framework.
 
-This work extends the evaluation of Barati Nia et al.~\cite{llmgen2025} under this cross-language setting. Three state-of-the-art LLMs are prompted to generate Java implementations of graph algorithms while only C source files are provided as context. Two approaches are evaluated: an optimization approach for triangle counting, and an algorithm-synthesis approach covering triangle counting, diameter finding, and clique number, using RMAT benchmark graphs~\cite{rmat2004} in CSR format. Each implementation is evaluated on compilability, correctness, runtime, and memory usage, following the methodology of the original paper.
+This work extends the evaluation of Barati Nia et al.~\cite{llmgen2025} under this cross-language setting. Three state-of-the-art LLMs are prompted to generate Java implementations of graph algorithms while only C source files are provided as context. Two approaches are evaluated: an optimization approach for triangle counting, and an algorithm-synthesis approach covering triangle counting, diameter finding, and clique number, using RMAT benchmark graphs~\cite{rmat2004} in CSR format. Each implementation is evaluated on compilability, correctness, runtime, and memory usage, following the methodology of the original paper~\cite{llmgen2025}. To evaluate the obtained implementations, the benchmark suite in C was translated to Java beforehand.
 
 The remainder of this report is organized as follows. Section~\ref{sec:testing} describes the experimental setup and reports numerical results compared against the original paper~\cite{llmgen2025}. Section~\ref{sec:conclusions} summarizes findings and suggests future directions.
 
@@ -74,7 +65,7 @@ All experiments were conducted on an Apple MacBook Pro with an Apple M3 chip fea
 
 At the time of writing, three frontier large language models from the three most dominant AI providers were selected, each recognized for their strong reasoning and code generation capabilities.
 
-\textbf{Anthropic Claude Opus 4.6} (released February 5, 2026~\cite{anthropic2026opus46}) is Anthropic's most capable model, designed for superior coding, complex reasoning, and agentic workflows with a 1M token context window. Compared to Claude Sonnet 4 used in the original paper, it achieves state-of-the-art results on Terminal-Bench 2.0, leading us to expect stronger implementations.
+\textbf{Anthropic Claude Opus 4.6} (released February 5, 2026~\cite{anthropic2026opus46}) is Anthropic's most capable model, designed for superior coding, complex reasoning, and agentic workflows with a 1M token context window. Compared to Claude Sonnet 4 used in the original paper, it achieves better results on Terminal-Bench 2.0, leading us to expect stronger implementations.
 
 \textbf{Google Gemini 3.1 Pro} (released February 19, 2026~\cite{google2026gemini31pro}) represents a substantial improvement over the Gemini 2.5 models tested in the original paper, achieving more than double the reasoning performance on competitive coding benchmarks, making it a compelling candidate to re-evaluate Google's standing.
 
@@ -82,13 +73,13 @@ At the time of writing, three frontier large language models from the three most
 
 \subsection{Prompt Design}
 
-The altered prompts are given in Figure~\ref{fig:prompt-1} and Figure~\ref{fig:prompt-2} in the Appendix. In order to achieve the cross-language setting, the prompts are adapted from~\cite{llmgen2025} with two modifications: the target language is changed from C to Java, and the phrase \textit{``Suppose this whole framework is already translated to Java''} is added to inform models that a Java infrastructure exists without providing it, forcing them to infer the Java API from the C source alone. Each LLM was cold-started before each prompt~\cite{llmgen2025}.
+The altered prompts are given in Figure~\ref{fig:prompt-1} and Figure~\ref{fig:prompt-2} in the Appendix. In order to achieve the cross-language setting, the prompts are adapted from~\cite{llmgen2025} with two modifications: the target language is changed from C to Java, and the phrase \textit{``Suppose this whole framework is already translated to Java''} is added to inform models that a Java infrastructure exists without providing it. This forces the models to infer the Java API from the C source alone. Each LLM was cold-started before each prompt~\cite{llmgen2025}.
 
 \subsection{Optimization Approach Results}
 
 Table~\ref{tab:optimization} summarizes the results of the optimization approach on RMAT-16.  In contrast to the original paper, where three out of eight models failed to produce correct triangle counts~\cite{llmgen2025}, all three models in our evaluation compiled without any manual modification and produced correct results. This finding suggests that providing the full triangle counting implementation as context is sufficient for reliable cross-language generation.
 
-All three implementations substantially outperformed the brute-force baseline (27.07\,s), drawing on techniques present in the provided \texttt{tc.c} source file. GPT-5.3-Codex achieved the fastest runtime (0.298\,s, $\approx91\times$ faster) by employing all three optimizations available in the C context --- degree-based vertex sorting, hash-based intersection, and the Forward Triangle Counting algorithm --- at the cost of 25.73\,MB of peak memory. Claude Opus 4.6 achieved a nearly identical runtime (0.318\,s) using only hash-based intersection and FTC, without sorting. Gemini 3.1 Pro was $3.5\times$ slower at 1.032\,s but required zero additional memory, relying solely on FTC with a merge-path intersection over the already-sorted adjacency lists. This strategy trades runtime for memory efficiency. However,whether each model genuinely reasoned from the C source or reproduced patterns from training data remains an inherent limitation of this evaluation setup~\cite{llmgen2025}.
+All three implementations substantially outperformed the brute-force baseline (27.07\,s), drawing on techniques present in the provided \texttt{tc.c} source file. GPT-5.3-Codex achieved the fastest runtime (0.298\,s, $\approx91\times$ faster) by employing all three optimizations available in the C context, degree-based vertex sorting, hash-based intersection, and the Forward Triangle Counting algorithm, at the cost of 25.73\,MB of peak memory. Claude Opus 4.6 achieved a nearly identical runtime (0.318\,s) using only hash-based intersection and FTC, without sorting. Gemini 3.1 Pro was $3.5\times$ slower at 1.032\,s but required zero additional memory, relying solely on FTC with a merge-path intersection over the already-sorted adjacency lists. This strategy trades runtime for memory efficiency. However, whether each model genuinely reasoned from the C source or reproduced patterns from training data remains an inherent limitation of this evaluation setup~\cite{llmgen2025}.
 
 % \textcolor{red}{Maybe use programming language that does not have too many code examples and see how the translation works there}.
 
@@ -98,7 +89,7 @@ All three implementations substantially outperformed the brute-force baseline (2
 
 \begin{itemize}
   \item \textbf{Compilability:} The code must compile successfully without any manual modifications.
-  \item \textbf{Correctness:} The code must produces correct outputs on all test cases.
+  \item \textbf{Correctness:} The code must produce correct outputs on all test cases.
   \item \textbf{Timeliness:} The implementation must run within an acceptable runtime threshold to ensure practical usability.
 \end{itemize}
 
@@ -141,12 +132,12 @@ Model & Efficiency Rate \\
 \midrule
 Anthropic Claude Opus 4.6 & 0.15 \\
 Google Gemini 3.1 Pro & $\mathbf{2.63}$ \\
-OpenAI GPT-5.3-Codex & 0.0000 \\
+OpenAI GPT-5.3-Codex & 0.00 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The efficiency rates reflect the RTU results directly. Gemini 3.1 Pro achieves the highest total efficiency rate of 2.63, contributing rates across all three algorithms. Claude Opus 4.6 contributes only through its RTU triangle counting implementation, yielding a rate of 0.15, while GPT-5.3-Codex contributes nothing. Compared to the original paper's best result of 3.11 (Claude Sonnet 4 Extended), Gemini 3.1 Pro's 2.63 is competitive, suggesting that the newer Gemini model has significantly closed the gap with Anthropic's models observed in the original study. However, the low rates of the other models reflect a key limitation of the cross-language setting, where compilability failures caused by incorrect API assumptions disproportionately penalize the LLMs. Furthermore, with only three algorithms evaluated, a single failure has an outsized effect on the total score. Evaluating a broader algorithm suite would likely produce more differentiated and balanced results.
+The efficiency rates reflect the RTU results directly. Gemini 3.1 Pro achieves the highest total efficiency rate of 2.63, contributing rates across all three algorithms. Claude Opus 4.6 contributes only through its RTU triangle counting implementation, yielding a rate of 0.15, while GPT-5.3-Codex contributes nothing. Compared to the original paper's best result of 3.11 (Claude Sonnet 4 Extended), Gemini 3.1 Pro's 2.63 is competitive, suggesting that the newer Gemini model has significantly closed the gap with Anthropic's models observed in the original study. However, the low rates of the other models reflect a key limitation of the cross-language setting, where small compilability failures, such as using accessor methods instead of direct attribute access, caused by incorrect API assumptions, disproportionately penalizes the LLMs. Furthermore, with only three algorithms evaluated, a single failure has an outsized effect on the total score. Evaluating a broader algorithm suite would likely produce more differentiated and balanced results.
 
 % \subsection{Discussion}
 
@@ -166,25 +157,24 @@ The efficiency rates reflect the RTU results directly. Gemini 3.1 Pro achieves t
 \section{Summary and Conclusions}
 \label{sec:conclusions}
 
-% (~200 words)
-% Restate main findings, cross-language insight,
-% and suggest 1-2 future extensions.
+This project evaluated three LLMs on their ability to generate efficient Java graph algorithm implementations when provided with C source files as context. In the optimization approach, each model was able to generate a correct solution, with GPT-5.3-Codex and Claude Opus 4.6 achieving approximately $91\times$ speedup over the naive baseline. In contrast, Gemini 3.1 Pro implemented an in-place algorithm that was slower than its competitors but still outperformed the baseline with a speedup of roughly $26\times$. Despite these strong results, Gemini was the only model to continue this strong trend in the algorithm synthesis with 100\% RTU implementations for Triangle Counting, Graph Diameter, and Clique Number. While the Codex model from OpenAI failed to produce RTU Java code, due to lack of compilability and timeliness, Claude Opus was able to generate a correct Triangle Counting routine that was even faster than the one from Gemini. 
 
-This project evaluated three LLMs on their ability to generate efficient Java graph algorithm implementations when provided with C source files as context. [SUMMARIZE YOUR MAIN FINDINGS HERE].
+The central challenge in cross-language code generation lies in the API assumptions. Unlike the original paper, where models could directly reuse field names and function signatures from the provided C source, our setting required each model to abstract away the source language and infer a plausible Java API independently. Even state-of-the-art models failed at this. Furthermore, it is difficult to assess whether models genuinely reasoned from the provided C context or simply reproduced Java graph algorithm patterns seen during training. This is an inherent limitation of any LLM evaluation without training data transparency. Furthermore, the introduced efficiency metric itself amplified small differences in this setting. With only three algorithms evaluated, a single compilability failure has an outsized effect on the total score, and the RTU definition does not distinguish between a near-miss requiring one-line fix and a fundamentally incorrect implementation. A broader algorithm suite and a partial-credit RTU metric would produce more differentiated and informative results.
 
-These results suggest that [YOUR INSIGHT ABOUT CROSS-LANGUAGE GENERATION]. Compared to the original paper's C results \cite{llmgen2025}, [YOUR COMPARISON].
-
-Future extensions of this work could include: (1) testing additional LLMs or more recent model versions; (2) evaluating parallel Java implementations using \texttt{ForkJoinPool}; or (3) expanding the algorithm suite to include vertex and edge connectivity as tested in the full paper \cite{llmgen2025}.
+Future research could expand the evaluation suite to include edge and vertex connectivity, to offer a more nuanced assessment of model performance in the cross-language setting~\cite{llmgen2025}. Furthermore, investigating the translation across more divergent languages, such as C and Rust or COBOL and Python, could reveal whether the difficulty of the API integration scales with conceptual difference between programming languages. Finally, implementing iterative feedback loops, where models see compiler diagnostics and are allowed self-correction, provides a promising direction to overcome the pitfalls of the current efficiency rate metric.
 
 %---------------------------------------------------------------
 % ACKNOWLEDGEMENTS
 %---------------------------------------------------------------
-\section{Acknowledgements}
+
+\newpage 
+
+\section*{Acknowledgements}
 
 % YOU MUST fill this in --- required by the honour code.
 % List every AI tool used and exactly what for.
 
-The author used Claude (Anthropic) to assist with the translation of C infrastructure files into Java (\texttt{Graph.java}, \texttt{BFS.java}, \texttt{Queue.java}, \texttt{Main.java}), for guidance on project setup and Java compilation, and to generate this \LaTeX\ report skeleton. All experimental results, analysis, and written content are the author's own work.
+I hereby declare that I have made limited use of generative artificial intelligence during the preparation of this project. Specifically, Claude Sonnet 4.6 and Gemini 2.5 Flash were used to aid the translation of the C infrastructure files into Java (\texttt{Graph.java}, \texttt{BFS.java}, \texttt{Queue.java}, \texttt{Main.java}). Furthermore, they were used for guidance on overall project setup and Java compilation. All experimental results, analysis, and the written content are my own work.
 
 %---------------------------------------------------------------
 % REFERENCES
@@ -218,7 +208,7 @@ Attached Files: (bfs.c, graph.c, main.c, queue.c, tc.c)
 \begin{figure}[H]
 \noindent \textbf{Algorithm-Synthesis Approach}
 \begin{lstlisting}
-The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential mplementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
+The attached C files implement a graph in CSR format. Suppose this whole framework is already translated to Java. Write a Java method fast() with the API below that is the fastest sequential implementation for finding the {ALGORITHM} of a graph that integrates into the already translated Java framework:
 
   public static long fast(Graph graph)
 
